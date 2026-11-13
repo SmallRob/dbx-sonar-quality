@@ -45,6 +45,12 @@ def main():
         raise SystemExit("DBX 插件 UI 没有 allow-forms，按钮不能用 type=submit")
     if 'html[data-dbx-theme="dark"]' not in html:
         raise SystemExit("missing DBX dark theme tokens")
+    if "#drawerContent{display:flex" not in html:
+        raise SystemExit("detail drawer must be a flex column so its body can scroll")
+    if "html.drawer-open" not in html or "overflow-y:auto" not in html:
+        raise SystemExit("detail drawer must lock page scroll and scroll its own body")
+    if ".drawer-head .icon-btn" not in html:
+        raise SystemExit("detail drawer close button must keep a fixed 40x40 size")
     brutes = re.findall(r"<button\b[^>]*>", html, re.IGNORECASE)
     for tag in brutes:
         if not any(marker in tag for marker in ("data-action", "data-view", "issue-title", "id=", "type=\"button\"", "type=\"reset\"")):

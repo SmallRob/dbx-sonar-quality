@@ -3,7 +3,7 @@
   "manifest_version": 1,
   "id": "io.github.smallrob.sonar-quality",
   "name": "SonarQube Quality Hub",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publisher": "smallrob",
   "description": "A modern read-only SonarQube workspace: projects, analyses, issues, trends and global quality insights from PostgreSQL.",
   "icon": "assets/plugin.svg",

@@ -4,10 +4,10 @@
   "icon": "assets/plugin.svg",
   "tags": ["sonarqube", "code-quality", "postgresql", "security", "developer-tools"],
   "permissions": ["host.workbench"],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.5",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.6",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3.",
+  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3. Fixed the issue detail drawer: compact close button, scrollable detail content, locked background list and restored page scroll on close.",
   "localizations": {
     "zh-CN": {
       "name": "SonarQube 质量中心",

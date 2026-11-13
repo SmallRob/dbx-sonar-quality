@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.smallrob.sonar-quality",
   "publisher": "smallrob",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "name": "SonarQube Quality Hub",
   "description": "A modern read-only SonarQube workspace with project switching, analysis history, issue filtering and global quality insights.",
-  "icon": "https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.5/assets/plugin.svg",
+  "icon": "https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.6/assets/plugin.svg",
   "tags": [
     "sonarqube",
     "code-quality",
@@ -16,10 +16,10 @@
   "permissions": [
     "host.workbench"
   ],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.5",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.6",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3.",
+  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3. Fixed the issue detail drawer: compact close button, scrollable detail content, locked background list and restored page scroll on close.",
   "localizations": {
     "zh-CN": {
       "name": "SonarQube 质量中心",
@@ -29,33 +29,33 @@
   "targets": [
     {
       "target": "darwin-arm64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.5/io.github.smallrob.sonar-quality-0.1.5-darwin-arm64.dbxp",
-      "sha256": "a10a032bd67240357830ea827dcf12526fff44fb7ca79e50d3865671d6066ebf",
-      "size": 7336649
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.6/io.github.smallrob.sonar-quality-0.1.6-darwin-arm64.dbxp",
+      "sha256": "7a5784323795d5729a28aec4987e654da39245cc07bd80fd36acb18aa7b6da02",
+      "size": 7336833
     },
     {
       "target": "darwin-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.5/io.github.smallrob.sonar-quality-0.1.5-darwin-x64.dbxp",
-      "sha256": "4eca7a9b9bc39e0526e53bdef6bcce4fdc50d1256f7ee19c673bf2374e77be08",
-      "size": 7819783
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.6/io.github.smallrob.sonar-quality-0.1.6-darwin-x64.dbxp",
+      "sha256": "d4ff2ca27740038171d808c4784f2ac7bad05af9a94214760f3da037b4d1f195",
+      "size": 7819963
     },
     {
       "target": "linux-arm64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.5/io.github.smallrob.sonar-quality-0.1.5-linux-arm64.dbxp",
-      "sha256": "bf703fee41c080567aeff4ea718e15a4c62d12ecc5beb9e6b4d31c732cb49a7c",
-      "size": 6883989
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.6/io.github.smallrob.sonar-quality-0.1.6-linux-arm64.dbxp",
+      "sha256": "c6ba98582caff9d22dee375e8461b531b428167e09e01da830d06996c42d7f87",
+      "size": 6884175
     },
     {
       "target": "linux-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.5/io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp",
-      "sha256": "1efd1738e58a88a0290f4428f242daf4fda95ed12fb59497e9bb32d811609f26",
-      "size": 7521796
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.6/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp",
+      "sha256": "2c27154c4e499c2bf506e8e114c0ae03d8b37ae196889354b16f0b642c0765b0",
+      "size": 7521959
     },
     {
       "target": "windows-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.5/io.github.smallrob.sonar-quality-0.1.5-windows-x64.dbxp",
-      "sha256": "bef09ff65a370e38b21e102f694989fe2d2fa0dc8f257ac0a7a43c260281b3a5",
-      "size": 7612912
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.6/io.github.smallrob.sonar-quality-0.1.6-windows-x64.dbxp",
+      "sha256": "554bf11a1435970a861bd1e6706cddb9a970b0c70bdfdea852682808828aad20",
+      "size": 7613083
     }
   ]
 }
