@@ -105,6 +105,7 @@ type IssueQuery struct {
 	RuleUUID     string   `json:"ruleUuid"`
 	RuleUUIDs    []string `json:"ruleUuids"`
 	Directory    string   `json:"directory"`
+	Directories  []string `json:"directories"`
 	FileUUID     string   `json:"fileUuid"`
 	Assignee     string   `json:"assignee"`
 	Search       string   `json:"search"`

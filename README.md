@@ -3,7 +3,7 @@
 把 SonarQube 的老旧英文界面换成面向开发者的中文工作台。插件只读连接 SonarQube 的 PostgreSQL 数据库，直接读取扫描根源数据，不调用 Sonar Web API，也不向 Sonar 写入任何内容。
 
 - 插件 ID：`io.github.smallrob.sonar-quality`
-- 当前版本：`0.1.6`
+- 当前版本：`0.1.7`
 - 发布者：`smallrob`
 - 权限：`host.workbench`
 - 许可证：Apache-2.0
@@ -12,7 +12,7 @@
 
 - **项目切换**：同时查看多个 Sonar 项目，区分评审项目与普通项目。
 - **扫描历史**：按分析记录查看问题总量、质量门禁、耗时与指标变化。
-- **问题筛选**：按类型、严重级别、规则、目录、文件、关键字筛选，服务端排序分页；规则支持搜索、分页与跨页多选。
+- **问题筛选**：按类型、严重级别、规则、目录、文件、关键字筛选，服务端排序分页；规则与目录都支持搜索、分页与跨页多选。
 - **Markdown 导出**：按所选严重度导出当前筛选范围内的问题明细，按等级分组，包含规则键、文件行号、工作量、描述与处理建议；样例见 `docs/samples/sonarqube-issues-sample.md`。
 - **中文详情**：问题标题、规则说明、修复建议、变更记录与源码上下文；源码从 `file_sources` 解码，不依赖 Sonar Web。详情浮窗打开时锁定列表滚动，只允许详情内容上下滚动，关闭后恢复。
 - **全局统计**：跨项目质量矩阵、问题类型分布、技术债、覆盖率与安全热点汇总。
@@ -59,14 +59,14 @@ DBX Store 的五平台包使用 `bin/<target>/` 布局；部分 Docker DBX Web �
 
 ```powershell
 py -3.12 scripts/build-server-package.py `
-  dist/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-  .build/server/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
+  dist/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+  .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
   --target linux-x64
 
 py -3.12 scripts/sign-package.py `
-  .build/server/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-  .build/signed/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.6-linux-x64.artifact.json `
+  .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+  .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.artifact.json `
   --target linux-x64
 ```
 
@@ -86,4 +86,4 @@ py -3.12 scripts/sign-package.py `
 
 - 五平台包不得包含 `signature.json`，市场候选的 `sha256` 与 `size` 必须由构建脚本生成。
 - 不得提交 `.build/`、真实数据库凭据、签名私钥。
-- 正式上架前仍需：README/提审材料、GitHub Actions、Git 提交与 `v0.1.6` tag、Release 资产、DBX Store 候选 PR。
+- 正式上架前仍需：README/提审材料、GitHub Actions、Git 提交与 `v0.1.7` tag、Release 资产、DBX Store 候选 PR。

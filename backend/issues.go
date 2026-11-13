@@ -131,12 +131,17 @@ func issueWhere(query IssueQuery) (string, []any, error) {
 		args = append(args, query.FileUUID)
 		where += fmt.Sprintf(` AND i.component_uuid=$%d `, len(args))
 	}
-	if query.Directory != "" {
-		if len(query.Directory) > 600 {
-			return "", nil, errors.New("目录筛选过长")
+	if dirs := selectedDirectories(query); len(dirs) > 0 {
+		if len(dirs) > 100 {
+			return "", nil, errors.New("目录筛选数量过多")
 		}
-		args = append(args, query.Directory)
-		where += fmt.Sprintf(` AND (c.path=$%d OR c.path LIKE $%d||'/%%') `, len(args), len(args))
+		for _, dir := range dirs {
+			if len(dir) > 600 {
+				return "", nil, errors.New("目录筛选过长")
+			}
+		}
+		args = append(args, dirs)
+		where += fmt.Sprintf(` AND EXISTS (SELECT 1 FROM unnest($%d::text[]) AS d WHERE c.path=d OR c.path LIKE d||'/%%') `, len(args))
 	}
 	if query.Assignee != "" {
 		if len(query.Assignee) > 160 {
@@ -300,6 +305,7 @@ func filterSnapshot(snapshot *issueSnapshot, query IssueQuery) IssueList {
 	dirCounts := map[string]*GroupCount{}
 	assigneeCounts := map[string]*GroupCount{}
 	ruleFilter := map[string]bool{}
+	directoryFilter := selectedDirectories(query)
 	for _, ruleUUID := range query.RuleUUIDs {
 		if ruleUUID != "" {
 			ruleFilter[ruleUUID] = true
@@ -343,7 +349,7 @@ func filterSnapshot(snapshot *issueSnapshot, query IssueQuery) IssueList {
 		if query.FileUUID != "" && item.FileUUID != query.FileUUID {
 			continue
 		}
-		if query.Directory != "" && item.Directory != query.Directory && !strings.HasPrefix(item.FilePath, query.Directory+"/") {
+		if len(directoryFilter) > 0 && !matchesDirectories(item, directoryFilter) {
 			continue
 		}
 		if query.Assignee != "" && item.Assignee != query.Assignee {
@@ -394,6 +400,33 @@ func filterSnapshot(snapshot *issueSnapshot, query IssueQuery) IssueList {
 	result.Facets.Directories = groupCounts(dirCounts)
 	result.Facets.Assignees = groupCounts(assigneeCounts)
 	return result
+}
+
+func selectedDirectories(query IssueQuery) []string {
+	values := append([]string{}, query.Directories...)
+	if query.Directory != "" {
+		values = append(values, query.Directory)
+	}
+	seen := map[string]bool{}
+	result := []string{}
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" || seen[value] {
+			continue
+		}
+		seen[value] = true
+		result = append(result, value)
+	}
+	return result
+}
+
+func matchesDirectories(item Issue, directories []string) bool {
+	for _, directory := range directories {
+		if item.Directory == directory || strings.HasPrefix(item.FilePath, directory+"/") {
+			return true
+		}
+	}
+	return false
 }
 
 func containsInt(values []int, want int) bool {

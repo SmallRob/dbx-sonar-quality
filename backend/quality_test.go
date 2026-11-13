@@ -119,6 +119,23 @@ func TestLocalizeIssue(t *testing.T) {
 	}
 }
 
+func TestIssueWhereSupportsMultipleDirectories(t *testing.T) {
+	where, args, err := issueWhere(IssueQuery{ProjectUUID: "project-1", Directories: []string{"src/main", "src/test", "src/main"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(where, "unnest(") || !strings.Contains(where, "c.path=d") || !strings.Contains(where, "LIKE d||'/%'") {
+		t.Fatalf("目录多选条件错误: %s", where)
+	}
+	if len(args) != 2 {
+		t.Fatalf("参数数量错误: %d", len(args))
+	}
+	dirs, ok := args[1].([]string)
+	if !ok || len(dirs) != 2 || dirs[0] != "src/main" || dirs[1] != "src/test" {
+		t.Fatalf("目录去重错误: %#v", args[1])
+	}
+}
+
 func TestFilterSnapshotAndSummary(t *testing.T) {
 	line := 12
 	snapshot := &issueSnapshot{SchemaVersion: 1, ProjectUUID: "p", AnalysisUUID: "a", Issues: []Issue{
@@ -133,6 +150,13 @@ func TestFilterSnapshotAndSummary(t *testing.T) {
 	multiRule := filterSnapshot(snapshot, IssueQuery{Limit: 50, RuleUUIDs: []string{"r1", "r2"}})
 	if multiRule.Total != 2 || len(multiRule.Items) != 2 {
 		t.Fatalf("快照规则多选错误: %+v", multiRule)
+	}
+	multiDir := filterSnapshot(snapshot, IssueQuery{Limit: 50, Directories: []string{"src", "docs"}})
+	if multiDir.Total != 2 || len(multiDir.Items) != 2 {
+		t.Fatalf("快照目录多选错误: %+v", multiDir)
+	}
+	if none := filterSnapshot(snapshot, IssueQuery{Limit: 50, Directories: []string{"src/none"}}); none.Total != 0 {
+		t.Fatalf("快照目录子路径不应误匹配: %+v", none)
 	}
 	summary, severities, files, rules := summarizeIssues(snapshot.Issues)
 	if summary.Total != 2 || summary.Bugs != 1 || summary.CodeSmells != 1 || summary.Resolved != 1 || summary.EffortMinutes != 40 {

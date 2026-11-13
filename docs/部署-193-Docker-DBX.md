@@ -16,14 +16,14 @@
 
 ## 已安装版本
 
-- 版本：`0.1.6`
-- 安装包：`io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp`
-- SHA-256：`390b12306d4a89e1523d6dec1139ca810c5360a5df10570a2426b932a83f4b95`
-- 大小：`7,522,199` 字节
-- 激活记录：`activations/00000000000000000007-b2124694-1282-47ee-aa0d-8dc6aa72bdcc.json`
+- 版本：`0.1.7`
+- 安装包：`io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp`
+- SHA-256：`15bd31931854c2f790bdedc6dd894f6feda75dcd5965c474ecf141a934dfd227`
+- 大小：`7,526,636` 字节
+- 激活记录：`activations/00000000000000000008-0e3b1fdf-29ef-4754-86f3-96421f119371.json`
 - provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
 
-`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注；`0.1.6` 修复问题详情浮窗按钮布局，并在打开时锁定列表滚动、只让详情内容滚动，是当前应使用的版本。不要回滚到旧版本。
+`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注；`0.1.6` 修复问题详情浮窗按钮布局，并在打开时锁定列表滚动；`0.1.7` 把目录筛选改为可搜索、分页、跨页多选的浮窗，并让问题查询与 Markdown 导出共用多目录条件，是当前应使用的版本。不要回滚到旧版本。
 
 ## Workbench 运行环境约束
 
@@ -83,8 +83,8 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/build-server-package.py `
-     dist/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-     .build/server/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
+     dist/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+     .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
      --target linux-x64
    ```
 
@@ -92,9 +92,9 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/sign-package.py `
-     .build/server/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-     .build/signed/io.github.smallrob.sonar-quality-0.1.6-linux-x64.dbxp `
-     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.6-linux-x64.artifact.json `
+     .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+     .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.artifact.json `
      --target linux-x64
    ```
 
@@ -156,7 +156,7 @@ DBX_JAVA_BIN=/usr/bin/java
 
 ## Workbench UI 验收
 
-`0.1.6` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
+`0.1.7` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
 
 | 检查 | 结果 |
 | --- | --- |
@@ -165,6 +165,12 @@ DBX_JAVA_BIN=/usr/bin/java
 | 规则浮窗 | 135 条规则、7 页、每页 20 行；搜索 `String` 命中 5 条；跨页选中 3 条后按钮显示「已选 3 条规则」 |
 | 规则键 | 每条规则下方显示 `java:S1192`、`go:S1192` 等规则键，可区分同名规则 |
 | 多规则查询 | 「应用筛选」后 `window.__lastQuery.ruleUuids` 含 3 个 UUID；接口查询 `java:S1192` 854 条、`go:S1192` 128 条，合并为 982 条 |
+| 目录浮窗 | 真实 192 个目录、10 页、每页 20 行；浮窗宽 600、高 480，超出屏幕时自动上翻 |
+| 目录搜索 | 输入 `agentorbit` 命中 22 个目录，路径按两行展示并保留完整内容 |
+| 目录跨页多选 | 第 1 页选中 1 个、翻到第 2 页再选 1 个，按钮显示「已选 2 个目录」，`window.__lastQuery.directories` 含 2 条完整路径 |
+| 目录清空与关闭 | 「全部目录（清除目录筛选）」「清空已选」可清空；「应用筛选」、外部点击与 `Escape` 均可关闭浮窗 |
+
+截图：`docs/screenshots/directory-picker-dark.png`、`docs/screenshots/directory-picker-light.png`。
 | 导出弹窗 | 默认继承当前严重度筛选；选 `CRITICAL` + `MAJOR` 后请求 `severities` 与 `ruleUuids` 正确，`limit=5000`；文件名含严重度与时间 |
 | 导出保存 | 宿主提供 `window.dbxPlugin.saveFile` 时直接保存 `.md`；无保存接口时打开 Markdown 预览，可复制或尝试浏览器下载 |
 | 导出样例 | `docs/samples/sonarqube-issues-sample.md`：脱敏示例，展示导出文件头、严重度汇总与逐条明细字段 |
@@ -174,18 +180,19 @@ DBX_JAVA_BIN=/usr/bin/java
 | 暗色主题 | `data-dbx-theme="dark"` 生效，浮窗背景 `rgb(23, 30, 38)`，页面、面板、输入框、表格与通知均切换为暗色 |
 | 亮色主题 | 保持原有浅色视觉，浮窗背景 `rgb(255, 255, 255)`，不出现残影或低对比 |
 | 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
-| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`7d376aeb463f6a69af3bd2ec8c5332f4b12ed0dd323f0858d92ead14395d3094` |
+| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`d6b796262e3cb76c22d7471dc534bc4e98c3beb9e267aa9ba5294d3a70a8cc9e` |
 
 ## 页面验收
 
 1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
-2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.6`；侧栏版本应显示 `v0.1.6`。
+2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.7`；侧栏版本应显示 `v0.1.7`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
 4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
 5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
 6. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
-7. 点击「导出 Markdown」，选择一个或多个严重度，确认宿主弹出保存对话框并生成 `.md`；打开文件检查严重度汇总、分组和逐条明细。
-8. 点击任一问题，确认中文规则说明和源码上下文可见；浮窗打开后页面列表不再滚动，滚轮只滚动详情内容直到底部，关闭按钮为方形且关闭后列表恢复滚动。
+7. 点击「目录」，搜索路径、翻页并跨页勾选多个目录，点「应用筛选」，确认列表只显示所选目录及其子目录；再点「导出 Markdown」，确认导出范围同样受目录多选限制。
+8. 点击「导出 Markdown」，选择一个或多个严重度，确认宿主弹出保存对话框并生成 `.md`；打开文件检查严重度汇总、分组和逐条明细。
+9. 点击任一问题，确认中文规则说明和源码上下文可见；浮窗打开后页面列表不再滚动，滚轮只滚动详情内容直到底部，关闭按钮为方形且关闭后列表恢复滚动。
 
 ## 故障排查
 
