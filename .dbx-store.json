@@ -1,0 +1,17 @@
+{
+  "name": "SonarQube Quality Hub",
+  "description": "A modern read-only SonarQube workspace with project switching, analysis history, issue filtering and global quality insights.",
+  "icon": "assets/plugin.svg",
+  "tags": ["sonarqube", "code-quality", "postgresql", "security", "developer-tools"],
+  "permissions": ["host.workbench"],
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.1",
+  "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
+  "license": "Apache-2.0",
+  "releaseNotes": "Initial release: read-only PostgreSQL connection, project overview, issue explorer, analysis history, local issue snapshots and global project statistics. Fixed DBX protocol initialization compatibility for empty capabilities.",
+  "localizations": {
+    "zh-CN": {
+      "name": "SonarQube 质量中心",
+      "description": "现代化 SonarQube 只读工作台：项目切换、扫描历史、分类筛选、中文问题详情与全局质量统计。"
+    }
+  }
+}

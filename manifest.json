@@ -1,0 +1,85 @@
+{
+  "$schema": "https://raw.githubusercontent.com/t8y2/dbx/main/plugins/manifest.schema.json",
+  "manifest_version": 1,
+  "id": "io.github.smallrob.sonar-quality",
+  "name": "SonarQube Quality Hub",
+  "version": "0.1.1",
+  "publisher": "smallrob",
+  "description": "A modern read-only SonarQube workspace: projects, analyses, issues, trends and global quality insights from PostgreSQL.",
+  "icon": "assets/plugin.svg",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality",
+  "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
+  "permissions": ["host.workbench"],
+  "engines": {
+    "dbx": ">=0.6.38",
+    "host_api": "1"
+  },
+  "entrypoints": {
+    "backend": {
+      "executable": "bin/dbx-plugin-sonar-quality"
+    },
+    "ui": {
+      "root": "ui",
+      "entry": "ui/index.html"
+    }
+  },
+  "contributions": [
+    {
+      "type": "workbench",
+      "id": "io.github.smallrob.sonar-quality.workbench",
+      "label": "SonarQube Quality Hub",
+      "description": "Explore SonarQube quality data without modifying projects, issues or analyses.",
+      "icon": "assets/plugin.svg"
+    },
+    {
+      "type": "command",
+      "id": "io.github.smallrob.sonar-quality.open",
+      "label": "SonarQube Quality Hub",
+      "description": "Open the quality hub in a workbench tab.",
+      "icon": "assets/plugin.svg",
+      "action": {
+        "type": "open-workbench",
+        "workbench": "io.github.smallrob.sonar-quality.workbench",
+        "presentation": "tab"
+      }
+    },
+    {
+      "type": "menus",
+      "id": "io.github.smallrob.sonar-quality.menus",
+      "items": [
+        {
+          "location": "appToolbar",
+          "command": "io.github.smallrob.sonar-quality.open",
+          "group": "navigation",
+          "order": 30,
+          "default_visible": true
+        },
+        {
+          "location": "commandPalette",
+          "command": "io.github.smallrob.sonar-quality.open",
+          "group": "navigation",
+          "order": 30
+        }
+      ]
+    }
+  ],
+  "localizations": {
+    "zh-CN": {
+      "name": "SonarQube 质量中心",
+      "description": "现代化 SonarQube 只读工作台：通过 PostgreSQL 查看项目、扫描、问题、趋势和全局质量统计。",
+      "contributions": {
+        "io.github.smallrob.sonar-quality.workbench": {
+          "label": "SonarQube 质量中心",
+          "description": "只读浏览项目、扫描与问题，不修改 SonarQube 数据。"
+        },
+        "io.github.smallrob.sonar-quality.open": {
+          "label": "SonarQube 质量中心",
+          "description": "在工作台标签页打开质量中心。"
+        },
+        "io.github.smallrob.sonar-quality.menus": {
+          "label": "SonarQube 质量中心"
+        }
+      }
+    }
+  }
+}

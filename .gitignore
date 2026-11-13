@@ -1,0 +1,18 @@
+# Build artifacts
+dist/
+.crossbuild/
+.build/
+*.exe
+*.test
+
+# Local runtime and credentials
+.runtime/
+testdata/
+**/config.json
+*.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
