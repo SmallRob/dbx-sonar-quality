@@ -29,7 +29,7 @@ func TestIssueWhereUsesReadOnlyParameters(t *testing.T) {
 }
 
 func TestIssueWhereRejectsInvalidValues(t *testing.T) {
-	for _, query := range []IssueQuery{{ProjectUUID: "../bad"}, {ProjectUUID: "p", Severities: []string{"URGENT"}}, {ProjectUUID: "p", Types: []int{99}}, {ProjectUUID: "p", Sort: "unknown"}} {
+	for _, query := range []IssueQuery{{ProjectUUID: "../bad"}, {ProjectUUID: "p", Severities: []string{"URGENT"}}, {ProjectUUID: "p", Types: []int{99}}, {ProjectUUID: "p", Sort: "unknown"}, {ProjectUUID: "p", RuleUUIDs: []string{"../bad"}}} {
 		if query.Sort == "unknown" {
 			if _, err := issueOrder(query.Sort); err == nil {
 				t.Fatal("应拒绝未知排序")
@@ -39,6 +39,23 @@ func TestIssueWhereRejectsInvalidValues(t *testing.T) {
 		if _, _, err := issueWhere(query); err == nil {
 			t.Fatalf("应拒绝输入: %+v", query)
 		}
+	}
+}
+
+func TestIssueWhereSupportsMultipleRules(t *testing.T) {
+	where, args, err := issueWhere(IssueQuery{ProjectUUID: "project-1", RuleUUIDs: []string{"rule-1", "rule-2", "rule-1"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(where, "i.rule_uuid=ANY(") {
+		t.Fatalf("规则多选必须使用数组条件: %s", where)
+	}
+	if len(args) != 2 {
+		t.Fatalf("参数数量错误: %d", len(args))
+	}
+	rules, ok := args[1].([]string)
+	if !ok || len(rules) != 2 || rules[0] != "rule-1" || rules[1] != "rule-2" {
+		t.Fatalf("规则去重错误: %#v", args[1])
 	}
 }
 
@@ -63,6 +80,10 @@ func TestFilterSnapshotAndSummary(t *testing.T) {
 	result := filterSnapshot(snapshot, IssueQuery{Limit: 50, Severities: []string{"blocker"}})
 	if result.Total != 1 || len(result.Items) != 1 || result.Items[0].Key != "i1" {
 		t.Fatalf("快照筛选错误: %+v", result)
+	}
+	multiRule := filterSnapshot(snapshot, IssueQuery{Limit: 50, RuleUUIDs: []string{"r1", "r2"}})
+	if multiRule.Total != 2 || len(multiRule.Items) != 2 {
+		t.Fatalf("快照规则多选错误: %+v", multiRule)
 	}
 	summary, severities, files, rules := summarizeIssues(snapshot.Issues)
 	if summary.Total != 2 || summary.Bugs != 1 || summary.CodeSmells != 1 || summary.Resolved != 1 || summary.EffortMinutes != 40 {

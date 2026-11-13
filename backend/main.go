@@ -13,7 +13,7 @@ import (
 
 const pluginID = "io.github.smallrob.sonar-quality"
 
-var pluginVersion = "0.1.2"
+var pluginVersion = "0.1.3"
 
 type plugin struct {
 	connector *dbConnector
@@ -161,10 +161,11 @@ func (p *plugin) Handle(_ dbxpluginsdk.RequestContext, method string, params jso
 				return nil, dbxpluginsdk.NewError(-32602, "query 格式错误")
 			}
 		} else {
-			query = IssueQuery{ProjectUUID: str("projectUuid"), AnalysisUUID: str("analysisUuid"), RuleUUID: str("ruleUuid"), Directory: str("directory"), FileUUID: str("fileUuid"), Assignee: str("assignee"), Search: str("search"), Sort: str("sort"), Scope: str("scope"), Limit: integer("limit"), Offset: integer("offset"), Types: []int{}, Severities: []string{}, Statuses: []string{}}
+			query = IssueQuery{ProjectUUID: str("projectUuid"), AnalysisUUID: str("analysisUuid"), RuleUUID: str("ruleUuid"), Directory: str("directory"), FileUUID: str("fileUuid"), Assignee: str("assignee"), Search: str("search"), Sort: str("sort"), Scope: str("scope"), Limit: integer("limit"), Offset: integer("offset"), Types: []int{}, Severities: []string{}, Statuses: []string{}, RuleUUIDs: []string{}}
 			_ = decode("types", &query.Types)
 			_ = decode("severities", &query.Severities)
 			_ = decode("statuses", &query.Statuses)
+			_ = decode("ruleUuids", &query.RuleUUIDs)
 		}
 		ctx, cancel := queryContext()
 		defer cancel()

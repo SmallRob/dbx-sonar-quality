@@ -100,12 +100,29 @@ func issueWhere(query IssueQuery) (string, []any, error) {
 		args = append(args, values)
 		where += fmt.Sprintf(` AND i.status=ANY($%d) `, len(args))
 	}
+	ruleUUIDs := append([]string{}, query.RuleUUIDs...)
 	if query.RuleUUID != "" {
-		if !validSonarID(query.RuleUUID) {
+		ruleUUIDs = append(ruleUUIDs, query.RuleUUID)
+	}
+	seenRules := map[string]bool{}
+	ruleValues := []string{}
+	for _, ruleUUID := range ruleUUIDs {
+		ruleUUID = strings.TrimSpace(ruleUUID)
+		if ruleUUID == "" || seenRules[ruleUUID] {
+			continue
+		}
+		if !validSonarID(ruleUUID) {
 			return "", nil, errors.New("ruleUuid 格式不正确")
 		}
-		args = append(args, query.RuleUUID)
-		where += fmt.Sprintf(` AND i.rule_uuid=$%d `, len(args))
+		seenRules[ruleUUID] = true
+		ruleValues = append(ruleValues, ruleUUID)
+	}
+	if len(ruleValues) > 500 {
+		return "", nil, errors.New("规则筛选数量过多")
+	}
+	if len(ruleValues) > 0 {
+		args = append(args, ruleValues)
+		where += fmt.Sprintf(` AND i.rule_uuid=ANY($%d) `, len(args))
 	}
 	if query.FileUUID != "" {
 		if !validSonarID(query.FileUUID) {
@@ -248,12 +265,13 @@ func (p *plugin) liveIssues(ctx context.Context, cfg Config, query IssueQuery, w
 func (p *plugin) issueFacets(ctx context.Context, db *sql.DB, projectUUID string) FilterFacets {
 	facets := FilterFacets{Rules: []GroupCount{}, Directories: []GroupCount{}, Assignees: []GroupCount{}}
 	queries := []struct {
-		sql    string
-		target *[]GroupCount
+		sql      string
+		target   *[]GroupCount
+		withHint bool
 	}{
-		{`SELECT r.uuid,r.name,count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid JOIN rules r ON r.uuid=i.rule_uuid WHERE pb.project_uuid=$1 AND i.resolution IS NULL GROUP BY r.uuid,r.name ORDER BY count(*) DESC,r.name LIMIT 500`, &facets.Rules},
-		{`SELECT coalesce(regexp_replace(c.path,'/[^/]*$',''),''),coalesce(regexp_replace(c.path,'/[^/]*$',''),''),count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid JOIN components c ON c.uuid=i.component_uuid WHERE pb.project_uuid=$1 AND i.resolution IS NULL GROUP BY 1,2 ORDER BY count(*) DESC LIMIT 500`, &facets.Directories},
-		{`SELECT i.assignee,coalesce(u.name,i.assignee),count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid LEFT JOIN users u ON u.uuid=i.assignee WHERE pb.project_uuid=$1 AND i.resolution IS NULL AND i.assignee IS NOT NULL GROUP BY i.assignee,u.name ORDER BY count(*) DESC LIMIT 100`, &facets.Assignees},
+		{`SELECT r.uuid,r.name,coalesce(r.plugin_name||':'||r.plugin_rule_key,''),count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid JOIN rules r ON r.uuid=i.rule_uuid WHERE pb.project_uuid=$1 AND i.resolution IS NULL GROUP BY r.uuid,r.name,r.plugin_name,r.plugin_rule_key ORDER BY count(*) DESC,r.name LIMIT 500`, &facets.Rules, true},
+		{`SELECT coalesce(regexp_replace(c.path,'/[^/]*$',''),''),coalesce(regexp_replace(c.path,'/[^/]*$',''),''),count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid JOIN components c ON c.uuid=i.component_uuid WHERE pb.project_uuid=$1 AND i.resolution IS NULL GROUP BY 1,2 ORDER BY count(*) DESC LIMIT 500`, &facets.Directories, false},
+		{`SELECT i.assignee,coalesce(u.name,i.assignee),count(*) FROM issues i JOIN project_branches pb ON pb.uuid=i.project_uuid LEFT JOIN users u ON u.uuid=i.assignee WHERE pb.project_uuid=$1 AND i.resolution IS NULL AND i.assignee IS NOT NULL GROUP BY i.assignee,u.name ORDER BY count(*) DESC LIMIT 100`, &facets.Assignees, false},
 	}
 	for _, q := range queries {
 		rows, err := db.QueryContext(ctx, q.sql, projectUUID)
@@ -262,7 +280,11 @@ func (p *plugin) issueFacets(ctx context.Context, db *sql.DB, projectUUID string
 		}
 		for rows.Next() {
 			var item GroupCount
-			if rows.Scan(&item.ID, &item.Label, &item.Count) == nil {
+			if q.withHint {
+				if rows.Scan(&item.ID, &item.Label, &item.Hint, &item.Count) == nil {
+					*q.target = append(*q.target, item)
+				}
+			} else if rows.Scan(&item.ID, &item.Label, &item.Count) == nil {
 				*q.target = append(*q.target, item)
 			}
 		}
@@ -277,10 +299,19 @@ func filterSnapshot(snapshot *issueSnapshot, query IssueQuery) IssueList {
 	ruleCounts := map[string]*GroupCount{}
 	dirCounts := map[string]*GroupCount{}
 	assigneeCounts := map[string]*GroupCount{}
+	ruleFilter := map[string]bool{}
+	for _, ruleUUID := range query.RuleUUIDs {
+		if ruleUUID != "" {
+			ruleFilter[ruleUUID] = true
+		}
+	}
+	if query.RuleUUID != "" {
+		ruleFilter[query.RuleUUID] = true
+	}
 	for _, item := range snapshot.Issues {
 		if item.Resolution == "" {
 			if ruleCounts[item.RuleUUID] == nil {
-				ruleCounts[item.RuleUUID] = &GroupCount{ID: item.RuleUUID, Label: item.RuleName}
+				ruleCounts[item.RuleUUID] = &GroupCount{ID: item.RuleUUID, Label: item.RuleName, Hint: item.RuleKey}
 			}
 			ruleCounts[item.RuleUUID].Count++
 			if dirCounts[item.Directory] == nil {
@@ -306,7 +337,7 @@ func filterSnapshot(snapshot *issueSnapshot, query IssueQuery) IssueList {
 		if len(query.Statuses) > 0 && !containsStringFold(query.Statuses, item.Status) {
 			continue
 		}
-		if query.RuleUUID != "" && item.RuleUUID != query.RuleUUID {
+		if len(ruleFilter) > 0 && !ruleFilter[item.RuleUUID] {
 			continue
 		}
 		if query.FileUUID != "" && item.FileUUID != query.FileUUID {

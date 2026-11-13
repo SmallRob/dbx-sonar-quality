@@ -16,22 +16,23 @@
 
 ## 已安装版本
 
-- 版本：`0.1.2`
-- 安装包：`io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp`
-- SHA-256：`9503b79f4056affd31075d2c1c418960657444191fa174c2fd896bbc724d3b81`
-- 大小：`7,484,326` 字节
-- 激活记录：`activations/00000000000000000003-12ef53b3-24cc-4122-be85-92aabc60da19.json`
+- 版本：`0.1.3`
+- 安装包：`io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp`
+- SHA-256：`eb245416cbc44a8c7ba797469d565e9c1210c912efd8b65070d42bfb4550aeac`
+- 大小：`7,489,964` 字节
+- 激活记录：`activations/00000000000000000004-d2e3065a-269c-47f6-80b9-eaf90f8e06f4.json`
 - provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
 
-`0.1.0` 在 DBX 上初始化失败，`0.1.1` 修复了空 `capabilities`，但 UI 还依赖 `localStorage`。`0.1.2` 移除了该依赖并补齐暗色主题，是当前应使用的版本；不要回滚到 `0.1.0` 或 `0.1.1`。
+`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗、多规则查询和规则键提示，同时移除会被 sandbox 拦截的原生表单提交。当前应使用 `0.1.3`，不要回滚到旧版本。
 
 ## Workbench 运行环境约束
 
-DBX 把插件 UI 放进 `sandbox="allow-scripts"` 的 iframe，没有 `allow-same-origin`，因此：
+DBX 把插件 UI 放进 `sandbox="allow-scripts"` 的 iframe，没有 `allow-same-origin`、`allow-forms`，因此：
 
 - 不能访问 `localStorage` / `sessionStorage`，否则脚本在初始化前抛出 `SecurityError`，表现为页面能显示但所有按钮无响应；
+- 不能依赖原生 `<form>` 提交，浏览器会报 `Blocked form submission ... allow-forms`。“应用筛选”“保存并连接”均已改为显式按钮事件；
 - 主题由宿主写入 `document.documentElement.dataset.dbxTheme`（`dark` / `light`），并通过 CSS 变量注入宿主 tokens；
-- 0.1.2 在样式前读取 `data-dbx-theme`，为亮色与暗色分别定义语义色，并覆盖表格、表单、弹窗、通知和徽标。
+- UI 在样式前读取 `data-dbx-theme`，为亮色与暗色分别定义语义色，并覆盖表格、表单、弹窗、通知、浮窗和徽标。
 
 修改 UI 后必须运行：
 
@@ -82,8 +83,8 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/build-server-package.py `
-     dist/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
-     .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+     dist/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
+     .build/server/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
      --target linux-x64
    ```
 
@@ -91,9 +92,9 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/sign-package.py `
-     .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
-     .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
-     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.artifact.json `
+     .build/server/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
+     .build/signed/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
+     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.3-linux-x64.artifact.json `
      --target linux-x64
    ```
 
@@ -154,24 +155,29 @@ DBX_JAVA_BIN=/usr/bin/java
 
 ## Workbench UI 验收
 
-`0.1.2` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
+`0.1.3` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
 
 | 检查 | 结果 |
 | --- | --- |
 | 「连接设置」按钮 | 弹窗正常打开，表单回填主机、端口、数据库、用户 |
 | 「测试连接」按钮 | 弹出只读校验成功通知 |
-| 暗色主题 | `data-dbx-theme="dark"` 生效，页面、面板、输入框、表格与通知均切换为暗色 |
-| 亮色主题 | 保持原有浅色视觉，不出现残影或低对比 |
-| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`ed58c4623dd6431ff34e14b87264b10c24159eb49adfa28895aa4b7cd645e952` |
+| 规则浮窗 | 135 条规则、7 页、每页 20 行；搜索 `String` 命中 5 条；跨页选中 3 条后按钮显示「已选 3 条规则」 |
+| 规则键 | 每条规则下方显示 `java:S1192`、`go:S1192` 等规则键，可区分同名规则 |
+| 多规则查询 | 「应用筛选」后 `window.__lastQuery.ruleUuids` 含 3 个 UUID；接口查询 `java:S1192` 854 条、`go:S1192` 128 条，合并为 982 条 |
+| 暗色主题 | `data-dbx-theme="dark"` 生效，浮窗背景 `rgb(23, 30, 38)`，页面、面板、输入框、表格与通知均切换为暗色 |
+| 亮色主题 | 保持原有浅色视觉，浮窗背景 `rgb(255, 255, 255)`，不出现残影或低对比 |
+| 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
+| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`80463bc89c080b78b37d7302635042f8eaa7f95d103e1dfba9f0d6e146a5169f` |
 
 ## 页面验收
 
 1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
-2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.2`；侧栏版本应显示 `v0.1.2`。
+2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.3`；侧栏版本应显示 `v0.1.3`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
 4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
 5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
-6. 点击任一问题，确认中文规则说明和源码上下文可见。
+6. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
+7. 点击任一问题，确认中文规则说明和源码上下文可见。
 
 ## 故障排查
 
@@ -179,6 +185,7 @@ DBX_JAVA_BIN=/usr/bin/java
 | --- | --- |
 | `invalid type: null, expected a sequence` | 插件初始化返回 `capabilities: null`。`0.1.1` 起改为 `[]`；不要安装 `0.1.0`。 |
 | 页面能显示但所有按钮无响应 | UI 在 `sandbox=allow-scripts` iframe 中访问了 `localStorage`，脚本初始化中断。`0.1.2` 已移除；`scripts/verify_frontend.py` 会阻止回归。 |
+| 点击「应用筛选」或「保存并连接」无反应 | 原生 `<form>` 提交被 `sandbox` 拦截（无 `allow-forms`）。`0.1.3` 已改为按钮事件；检查是否又引入了 `type="submit"` / `requestSubmit()`。 |
 | `Plugin backend executable does not exist` | 上传了标准 `bin/<target>/` 包。改用 `build-server-package.py` 生成平铺包。 |
 | `signature verification failed` / 拒绝安装 | 服务器未信任 `smallrob.internal-2026`，先写公钥；或包被重新打包导致 `checksums.json` 与签名不一致。 |
 | 配置保存后仍提示未连接 | 检查 `/app/data/plugin-data/io.github.smallrob.sonar-quality/config.json` 权限与密码；`config/test` 会返回具体缺失项。 |

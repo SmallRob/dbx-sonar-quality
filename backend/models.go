@@ -46,6 +46,7 @@ type IssueSummary struct {
 type GroupCount struct {
 	ID    string `json:"id"`
 	Label string `json:"label"`
+	Hint  string `json:"hint,omitempty"`
 	Count int    `json:"count"`
 }
 
@@ -102,6 +103,7 @@ type IssueQuery struct {
 	Severities   []string `json:"severities"`
 	Statuses     []string `json:"statuses"`
 	RuleUUID     string   `json:"ruleUuid"`
+	RuleUUIDs    []string `json:"ruleUuids"`
 	Directory    string   `json:"directory"`
 	FileUUID     string   `json:"fileUuid"`
 	Assignee     string   `json:"assignee"`
