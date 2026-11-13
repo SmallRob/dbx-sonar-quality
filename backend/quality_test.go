@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/OneOfOne/xxhash"
 	"github.com/pierrec/lz4/v4"
@@ -56,6 +57,54 @@ func TestIssueWhereSupportsMultipleRules(t *testing.T) {
 	rules, ok := args[1].([]string)
 	if !ok || len(rules) != 2 || rules[0] != "rule-1" || rules[1] != "rule-2" {
 		t.Fatalf("规则去重错误: %#v", args[1])
+	}
+}
+
+func TestExportMarkdownGroupsDetailsAndFilters(t *testing.T) {
+	line := 42
+	project := Project{Key: "asdm-app", Name: "示例项目"}
+	analysis := Analysis{UUID: "analysis-1", Version: "1.2.0", AnalyzedAt: 1763000000}
+	query := IssueQuery{ProjectUUID: "project-1", AnalysisUUID: "analysis-1", Scope: "open", Severities: []string{"CRITICAL", "MAJOR"}, RuleUUIDs: []string{"r1", "r2"}, Search: "password"}
+	items := []Issue{
+		{Key: "issue-1", RuleUUID: "r1", RuleKey: "java:S1192", RuleName: "String literals should not be duplicated", RuleNameZh: "重复字符串", Type: 1, TypeLabel: "代码异味", Severity: "CRITICAL", SeverityLabel: "严重", Status: "OPEN", StatusLabel: "未处理", MessageZh: "发现重复字符串", FilePath: "src/main.go", Line: &line, Effort: 35, Tags: []string{"design", "strings"}, CreatedAt: 1763000000},
+		{Key: "issue-2", RuleUUID: "r2", RuleKey: "java:S3776", RuleName: "Cognitive Complexity", RuleNameZh: "认知复杂度", Type: 1, TypeLabel: "代码异味", Severity: "MAJOR", SeverityLabel: "主要", Status: "OPEN", StatusLabel: "未处理", Message: "Refactor this method", FilePath: "src/service.go", Effort: 120},
+	}
+	markdown := buildIssueMarkdown(project, analysis, query, items, 3, true, "指定扫描", "http://sonar.example", time.Date(2026, 11, 13, 12, 0, 0, 0, exportLocation))
+	for _, want := range []string{
+		"# SonarQube 问题详情导出",
+		"项目：示例项目（`asdm-app`）",
+		"扫描：指定扫描 `analysis-1` · 版本 1.2.0",
+		"严重度：严重（CRITICAL）、主要（MAJOR）",
+		"仅未解决问题；已选 2 条规则；搜索：password",
+		"记录数：2 / 共 3 条（已达到单次导出上限 5000）",
+		"## 严重（CRITICAL） · 1 条",
+		"### 1. 重复字符串",
+		"- 规则键：`java:S1192`",
+		"- 文件：`src/main.go:42`",
+		"- 工作量：35 分钟",
+		"- 标签：design、strings",
+		"## 主要（MAJOR） · 1 条",
+		"- 工作量：2 小时",
+		"http://sonar.example/project/issues?id=asdm-app",
+	} {
+		if !strings.Contains(markdown, want) {
+			t.Fatalf("Markdown 缺少 %q:\n%s", want, markdown)
+		}
+	}
+	if strings.Contains(markdown, "## 阻断") || strings.Contains(markdown, "## 提示") {
+		t.Fatalf("未选严重度不应出现在导出中:\n%s", markdown)
+	}
+	if filename := exportFilename(project, IssueQuery{Severities: []string{"INFO", "BLOCKER"}}, time.Date(2026, 11, 13, 12, 0, 0, 0, exportLocation)); filename != "asdm-app-issues-blocker-info-20261113-1200.md" {
+		t.Fatalf("文件名错误: %s", filename)
+	}
+	if mdText("a|b <x>") != "a\\|b &lt;x&gt;" {
+		t.Fatalf("Markdown 转义错误")
+	}
+	if got := mdTime(1794369006913, exportLocation); got != "2026-11-11 11:50" {
+		t.Fatalf("毫秒时间戳转换错误: %s", got)
+	}
+	if !strings.Contains(markdown, "数据来源：本地留存的问题快照") {
+		t.Fatalf("快照来源标注错误")
 	}
 }
 

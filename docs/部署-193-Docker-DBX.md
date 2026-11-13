@@ -16,14 +16,14 @@
 
 ## 已安装版本
 
-- 版本：`0.1.3`
-- 安装包：`io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp`
-- SHA-256：`eb245416cbc44a8c7ba797469d565e9c1210c912efd8b65070d42bfb4550aeac`
-- 大小：`7,489,964` 字节
-- 激活记录：`activations/00000000000000000004-d2e3065a-269c-47f6-80b9-eaf90f8e06f4.json`
+- 版本：`0.1.5`
+- 安装包：`io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp`
+- SHA-256：`0c41e088d79fb252d9b29e249a45c228d16ea4df561d638c21ba00d06d35bf71`
+- 大小：`7,522,034` 字节
+- 激活记录：`activations/00000000000000000006-e72a29f4-dc64-48c9-bc41-d200d68884cd.json`
 - provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
 
-`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗、多规则查询和规则键提示，同时移除会被 sandbox 拦截的原生表单提交。当前应使用 `0.1.3`，不要回滚到旧版本。
+`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注，是当前应使用的版本。不要回滚到旧版本。
 
 ## Workbench 运行环境约束
 
@@ -40,7 +40,7 @@ DBX 把插件 UI 放进 `sandbox="allow-scripts"` 的 iframe，没有 `allow-sam
 py -3.12 scripts/verify_frontend.py
 ```
 
-该检查会拒绝 `localStorage` / `sessionStorage` 和缺少暗色令牌的单文件 UI。
+该检查会拒绝 `localStorage` / `sessionStorage`、原生表单提交和缺少暗色令牌的单文件 UI。
 
 ## 签名方式
 
@@ -83,8 +83,8 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/build-server-package.py `
-     dist/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
-     .build/server/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
+     dist/io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp `
+     .build/server/io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp `
      --target linux-x64
    ```
 
@@ -92,9 +92,9 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/sign-package.py `
-     .build/server/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
-     .build/signed/io.github.smallrob.sonar-quality-0.1.3-linux-x64.dbxp `
-     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.3-linux-x64.artifact.json `
+     .build/server/io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp `
+     .build/signed/io.github.smallrob.sonar-quality-0.1.5-linux-x64.dbxp `
+     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.5-linux-x64.artifact.json `
      --target linux-x64
    ```
 
@@ -148,6 +148,7 @@ DBX_JAVA_BIN=/usr/bin/java
 | `quality/scans` | 5 条扫描记录，最新 `AaHIuhZpeh8Lf7H4vhIz` |
 | `quality/overview` | 问题 3491；Code Smell 3246、Bug 94、漏洞 4、安全热点 147 |
 | `quality/issues` | 总数 3491，分页与排序正常 |
+| `quality/export` | 全部严重度 3491 条、2.48 MB、约 0.2 秒；仅严重 1809 条；按严重度分组与明细字段正确 |
 | `quality/issue` | 规则说明、变更记录与 25 行源码上下文正常 |
 | `quality/global` | 跨 2 个项目汇总正常 |
 
@@ -155,7 +156,7 @@ DBX_JAVA_BIN=/usr/bin/java
 
 ## Workbench UI 验收
 
-`0.1.3` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
+`0.1.5` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
 
 | 检查 | 结果 |
 | --- | --- |
@@ -164,20 +165,24 @@ DBX_JAVA_BIN=/usr/bin/java
 | 规则浮窗 | 135 条规则、7 页、每页 20 行；搜索 `String` 命中 5 条；跨页选中 3 条后按钮显示「已选 3 条规则」 |
 | 规则键 | 每条规则下方显示 `java:S1192`、`go:S1192` 等规则键，可区分同名规则 |
 | 多规则查询 | 「应用筛选」后 `window.__lastQuery.ruleUuids` 含 3 个 UUID；接口查询 `java:S1192` 854 条、`go:S1192` 128 条，合并为 982 条 |
+| 导出弹窗 | 默认继承当前严重度筛选；选 `CRITICAL` + `MAJOR` 后请求 `severities` 与 `ruleUuids` 正确，`limit=5000`；文件名含严重度与时间 |
+| 导出保存 | 宿主提供 `window.dbxPlugin.saveFile` 时直接保存 `.md`；无保存接口时打开 Markdown 预览，可复制或尝试浏览器下载 |
+| 导出样例 | `docs/samples/sonarqube-issues-sample.md`：脱敏示例，展示导出文件头、严重度汇总与逐条明细字段 |
 | 暗色主题 | `data-dbx-theme="dark"` 生效，浮窗背景 `rgb(23, 30, 38)`，页面、面板、输入框、表格与通知均切换为暗色 |
 | 亮色主题 | 保持原有浅色视觉，浮窗背景 `rgb(255, 255, 255)`，不出现残影或低对比 |
 | 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
-| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`80463bc89c080b78b37d7302635042f8eaa7f95d103e1dfba9f0d6e146a5169f` |
+| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`f1d8367bfca50fec5f9e4415f1d24191cf12e6a0a50fb756c2804d05f912b9c5` |
 
 ## 页面验收
 
 1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
-2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.3`；侧栏版本应显示 `v0.1.3`。
+2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.5`；侧栏版本应显示 `v0.1.5`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
 4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
 5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
 6. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
-7. 点击任一问题，确认中文规则说明和源码上下文可见。
+7. 点击「导出 Markdown」，选择一个或多个严重度，确认宿主弹出保存对话框并生成 `.md`；打开文件检查严重度汇总、分组和逐条明细。
+8. 点击任一问题，确认中文规则说明和源码上下文可见。
 
 ## 故障排查
 
@@ -189,4 +194,7 @@ DBX_JAVA_BIN=/usr/bin/java
 | `Plugin backend executable does not exist` | 上传了标准 `bin/<target>/` 包。改用 `build-server-package.py` 生成平铺包。 |
 | `signature verification failed` / 拒绝安装 | 服务器未信任 `smallrob.internal-2026`，先写公钥；或包被重新打包导致 `checksums.json` 与签名不一致。 |
 | 配置保存后仍提示未连接 | 检查 `/app/data/plugin-data/io.github.smallrob.sonar-quality/config.json` 权限与密码；`config/test` 会返回具体缺失项。 |
+| 导出按钮不可用 | 当前筛选结果为空，或问题接口失败；先确认列表已加载出问题。 |
+| 导出的时间显示异常 | 历史 `0.1.4` 把毫秒时间戳按秒解析；`0.1.5` 已兼容秒/毫秒，重新导出即可。 |
+| 导出无文件/无响应 | 宿主未提供 `window.dbxPlugin.saveFile` 时会显示预览；可在预览中复制，或尝试浏览器下载。 |
 | 历史扫描问题打不开 | 历史扫描的问题快照尚未留存；后台会补齐有扫描记录的最新快照，旧扫描需等待或手动触发。 |

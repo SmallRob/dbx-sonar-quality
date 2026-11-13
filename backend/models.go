@@ -124,6 +124,15 @@ type IssueList struct {
 	IssuesCaptured bool         `json:"issuesCaptured"`
 }
 
+type IssueExport struct {
+	Markdown   string   `json:"markdown"`
+	Filename   string   `json:"filename"`
+	Total      int      `json:"total"`
+	Exported   int      `json:"exported"`
+	Truncated  bool     `json:"truncated"`
+	Severities []string `json:"severities"`
+}
+
 type FilterFacets struct {
 	Rules       []GroupCount `json:"rules"`
 	Directories []GroupCount `json:"directories"`
