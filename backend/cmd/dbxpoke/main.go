@@ -76,7 +76,8 @@ func main() {
 		return fmt.Errorf("%s timed out", method)
 	}
 	var init struct {
-		ProtocolVersion int `json:"protocolVersion"`
+		ProtocolVersion int      `json:"protocolVersion"`
+		Capabilities    []string `json:"capabilities"`
 		Plugin          struct {
 			ID      string `json:"id"`
 			Version string `json:"version"`
@@ -84,6 +85,10 @@ func main() {
 	}
 	if err := send(1, "plugin/initialize", map[string]any{"host": map[string]any{"protocolVersions": []int{1}}}, &init); err != nil {
 		fmt.Fprintln(os.Stderr, "FAIL", err)
+		os.Exit(1)
+	}
+	if init.Capabilities == nil {
+		fmt.Fprintln(os.Stderr, "FAIL initialize capabilities decoded as null; new DBX requires an array")
 		os.Exit(1)
 	}
 	var ping map[string]any
@@ -100,7 +105,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "FAIL config/get leaked password")
 		os.Exit(1)
 	}
-	fmt.Printf("PASS initialize protocol=%d id=%s version=%s; ping and credential redaction ok\n", init.ProtocolVersion, init.Plugin.ID, init.Plugin.Version)
+	fmt.Printf("PASS initialize protocol=%d id=%s version=%s capabilities=%d; ping and credential redaction ok\n", init.ProtocolVersion, init.Plugin.ID, init.Plugin.Version, len(init.Capabilities))
 	_ = stdin.Close()
 	wait := make(chan error, 1)
 	go func() { wait <- cmd.Wait() }()

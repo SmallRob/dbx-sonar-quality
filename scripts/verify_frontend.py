@@ -37,6 +37,10 @@ def main():
             raise SystemExit(result.stderr or result.stdout)
     if re.search(r"onclick\s*=", html, re.IGNORECASE):
         raise SystemExit("inline onclick found; use bound listeners")
+    if "localStorage" in script or "sessionStorage" in script:
+        raise SystemExit("DBX 插件 UI 运行在 sandbox=allow-scripts iframe 中，不能使用 localStorage/sessionStorage")
+    if 'html[data-dbx-theme="dark"]' not in html:
+        raise SystemExit("missing DBX dark theme tokens")
     brutes = re.findall(r"<button\b[^>]*>", html, re.IGNORECASE)
     for tag in brutes:
         if not any(marker in tag for marker in ("data-action", "data-view", "issue-title", "id=", "type=\"submit\"", "type=\"button\"", "type=\"reset\"")):

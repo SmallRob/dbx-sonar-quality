@@ -16,14 +16,30 @@
 
 ## 已安装版本
 
-- 版本：`0.1.1`
-- 安装包：`io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp`
-- SHA-256：`195472450ec9b8c6093ebbcba26fd903b01f10925177ada2aeb81493113b650a`
-- 大小：`7,483,679` 字节
-- 激活记录：`activations/00000000000000000002-c781751a-284f-4ed7-acbc-bde796132ee4.json`
+- 版本：`0.1.2`
+- 安装包：`io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp`
+- SHA-256：`9503b79f4056affd31075d2c1c418960657444191fa174c2fd896bbc724d3b81`
+- 大小：`7,484,326` 字节
+- 激活记录：`activations/00000000000000000003-12ef53b3-24cc-4122-be85-92aabc60da19.json`
 - provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
 
-`0.1.0` 的激活记录保留在 `activations/00000000000000000001-*.json`。`0.1.0` 在 DBX 上初始化失败，不应回滚到该版本。
+`0.1.0` 在 DBX 上初始化失败，`0.1.1` 修复了空 `capabilities`，但 UI 还依赖 `localStorage`。`0.1.2` 移除了该依赖并补齐暗色主题，是当前应使用的版本；不要回滚到 `0.1.0` 或 `0.1.1`。
+
+## Workbench 运行环境约束
+
+DBX 把插件 UI 放进 `sandbox="allow-scripts"` 的 iframe，没有 `allow-same-origin`，因此：
+
+- 不能访问 `localStorage` / `sessionStorage`，否则脚本在初始化前抛出 `SecurityError`，表现为页面能显示但所有按钮无响应；
+- 主题由宿主写入 `document.documentElement.dataset.dbxTheme`（`dark` / `light`），并通过 CSS 变量注入宿主 tokens；
+- 0.1.2 在样式前读取 `data-dbx-theme`，为亮色与暗色分别定义语义色，并覆盖表格、表单、弹窗、通知和徽标。
+
+修改 UI 后必须运行：
+
+```powershell
+py -3.12 scripts/verify_frontend.py
+```
+
+该检查会拒绝 `localStorage` / `sessionStorage` 和缺少暗色令牌的单文件 UI。
 
 ## 签名方式
 
@@ -66,8 +82,8 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/build-server-package.py `
-     dist/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-     .build/server/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
+     dist/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+     .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
      --target linux-x64
    ```
 
@@ -75,9 +91,9 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/sign-package.py `
-     .build/server/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-     .build/signed/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.1-linux-x64.artifact.json `
+     .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+     .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.artifact.json `
      --target linux-x64
    ```
 
@@ -136,19 +152,33 @@ DBX_JAVA_BIN=/usr/bin/java
 
 `/api/plugins/active` 在重启后可能返回空数组，这是工作台插件的按需启动行为；`/api/plugins/invoke` 会自动拉起 sidecar 并成功执行。
 
+## Workbench UI 验收
+
+`0.1.2` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
+
+| 检查 | 结果 |
+| --- | --- |
+| 「连接设置」按钮 | 弹窗正常打开，表单回填主机、端口、数据库、用户 |
+| 「测试连接」按钮 | 弹出只读校验成功通知 |
+| 暗色主题 | `data-dbx-theme="dark"` 生效，页面、面板、输入框、表格与通知均切换为暗色 |
+| 亮色主题 | 保持原有浅色视觉，不出现残影或低对比 |
+| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`ed58c4623dd6431ff34e14b87264b10c24159eb49adfa28895aa4b7cd645e952` |
+
 ## 页面验收
 
 1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
-2. 在插件入口打开「SonarQube 质量中心」Workbench。
+2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.2`；侧栏版本应显示 `v0.1.2`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
-4. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
-5. 点击任一问题，确认中文规则说明和源码上下文可见。
+4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
+5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
+6. 点击任一问题，确认中文规则说明和源码上下文可见。
 
 ## 故障排查
 
 | 现象 | 原因与处理 |
 | --- | --- |
-| `invalid type: null, expected a sequence` | 插件初始化返回 `capabilities: null`。`0.1.1` 已改为 `[]`，不要安装 `0.1.0`。 |
+| `invalid type: null, expected a sequence` | 插件初始化返回 `capabilities: null`。`0.1.1` 起改为 `[]`；不要安装 `0.1.0`。 |
+| 页面能显示但所有按钮无响应 | UI 在 `sandbox=allow-scripts` iframe 中访问了 `localStorage`，脚本初始化中断。`0.1.2` 已移除；`scripts/verify_frontend.py` 会阻止回归。 |
 | `Plugin backend executable does not exist` | 上传了标准 `bin/<target>/` 包。改用 `build-server-package.py` 生成平铺包。 |
 | `signature verification failed` / 拒绝安装 | 服务器未信任 `smallrob.internal-2026`，先写公钥；或包被重新打包导致 `checksums.json` 与签名不一致。 |
 | 配置保存后仍提示未连接 | 检查 `/app/data/plugin-data/io.github.smallrob.sonar-quality/config.json` 权限与密码；`config/test` 会返回具体缺失项。 |

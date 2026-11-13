@@ -3,7 +3,7 @@
 把 SonarQube 的老旧英文界面换成面向开发者的中文工作台。插件只读连接 SonarQube 的 PostgreSQL 数据库，直接读取扫描根源数据，不调用 Sonar Web API，也不向 Sonar 写入任何内容。
 
 - 插件 ID：`io.github.smallrob.sonar-quality`
-- 当前版本：`0.1.1`
+- 当前版本：`0.1.2`
 - 发布者：`smallrob`
 - 权限：`host.workbench`
 - 许可证：Apache-2.0
@@ -58,14 +58,14 @@ DBX Store 的五平台包使用 `bin/<target>/` 布局；部分 Docker DBX Web �
 
 ```powershell
 py -3.12 scripts/build-server-package.py `
-  dist/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-  .build/server/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
+  dist/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+  .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
   --target linux-x64
 
 py -3.12 scripts/sign-package.py `
-  .build/server/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-  .build/signed/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp `
-  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.1-linux-x64.artifact.json `
+  .build/server/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+  .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp `
+  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.2-linux-x64.artifact.json `
   --target linux-x64
 ```
 
@@ -85,4 +85,4 @@ py -3.12 scripts/sign-package.py `
 
 - 五平台包不得包含 `signature.json`，市场候选的 `sha256` 与 `size` 必须由构建脚本生成。
 - 不得提交 `.build/`、真实数据库凭据、签名私钥。
-- 正式上架前仍需：README/提审材料、GitHub Actions、Git 提交与 `v0.1.1` tag、Release 资产、DBX Store 候选 PR。
+- 正式上架前仍需：README/提审材料、GitHub Actions、Git 提交与 `v0.1.2` tag、Release 资产、DBX Store 候选 PR。

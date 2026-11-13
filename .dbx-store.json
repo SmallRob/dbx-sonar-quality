@@ -4,10 +4,10 @@
   "icon": "assets/plugin.svg",
   "tags": ["sonarqube", "code-quality", "postgresql", "security", "developer-tools"],
   "permissions": ["host.workbench"],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.1",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.2",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "Initial release: read-only PostgreSQL connection, project overview, issue explorer, analysis history, local issue snapshots and global project statistics. Fixed DBX protocol initialization compatibility for empty capabilities.",
+  "releaseNotes": "Fixed the DBX sandboxed Workbench runtime so connection settings and all actions work without localStorage, and added complete light/dark theme support using the host data-dbx-theme tokens. Keeps the read-only PostgreSQL workspace, issue explorer, snapshots and global statistics.",
   "localizations": {
     "zh-CN": {
       "name": "SonarQube 质量中心",

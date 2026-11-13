@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.smallrob.sonar-quality",
   "publisher": "smallrob",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "name": "SonarQube Quality Hub",
   "description": "A modern read-only SonarQube workspace with project switching, analysis history, issue filtering and global quality insights.",
-  "icon": "https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.1/assets/plugin.svg",
+  "icon": "https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.2/assets/plugin.svg",
   "tags": [
     "sonarqube",
     "code-quality",
@@ -16,10 +16,10 @@
   "permissions": [
     "host.workbench"
   ],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.1",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.2",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "Initial release: read-only PostgreSQL connection, project overview, issue explorer, analysis history, local issue snapshots and global project statistics. Fixed DBX protocol initialization compatibility for empty capabilities.",
+  "releaseNotes": "Fixed the DBX sandboxed Workbench runtime so connection settings and all actions work without localStorage, and added complete light/dark theme support using the host data-dbx-theme tokens. Keeps the read-only PostgreSQL workspace, issue explorer, snapshots and global statistics.",
   "localizations": {
     "zh-CN": {
       "name": "SonarQube 质量中心",
@@ -29,33 +29,33 @@
   "targets": [
     {
       "target": "darwin-arm64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.1/io.github.smallrob.sonar-quality-0.1.1-darwin-arm64.dbxp",
-      "sha256": "73bc5c9c0b44df25a52b5216beddb05169ed63c03597f74dfd660e72f248858c",
-      "size": 7299279
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.2/io.github.smallrob.sonar-quality-0.1.2-darwin-arm64.dbxp",
+      "sha256": "99e0fd65423b2bf2065c45fd6d73049f8e73195ae81c81dbe8c6976180c60339",
+      "size": 7299934
     },
     {
       "target": "darwin-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.1/io.github.smallrob.sonar-quality-0.1.1-darwin-x64.dbxp",
-      "sha256": "4e97ca39ee3253df225e0bf094131e0656cf8c9f9bb3c30eb838150739a3c9f3",
-      "size": 7782474
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.2/io.github.smallrob.sonar-quality-0.1.2-darwin-x64.dbxp",
+      "sha256": "b9a2cf4e137b3f01fc383f2f914cc524431e99e804f6787bc378e2dc744c4d61",
+      "size": 7783121
     },
     {
       "target": "linux-arm64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.1/io.github.smallrob.sonar-quality-0.1.1-linux-arm64.dbxp",
-      "sha256": "9a9c26ccbb8c8a4f5f75fb9d10165a9f7ee59700d0a880b8258b6d85cdb5b811",
-      "size": 6845411
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.2/io.github.smallrob.sonar-quality-0.1.2-linux-arm64.dbxp",
+      "sha256": "f21477a8d72ae2a3b61ed3e722e035f15ffdd7b5f00f04a18522c75dc461d9ea",
+      "size": 6846041
     },
     {
       "target": "linux-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.1/io.github.smallrob.sonar-quality-0.1.1-linux-x64.dbxp",
-      "sha256": "52279f4dbd1ab0bf44653d8e628a3cb2e2ccae258c1d9cd74def89b0bb8ab4a8",
-      "size": 7483443
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.2/io.github.smallrob.sonar-quality-0.1.2-linux-x64.dbxp",
+      "sha256": "413068f68d749c0391fa642290bebac35542c4112398d62cd533bc61eab2a77b",
+      "size": 7484086
     },
     {
       "target": "windows-x64",
-      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.1/io.github.smallrob.sonar-quality-0.1.1-windows-x64.dbxp",
-      "sha256": "866b4a5b3b68ef962b9646ea03eed3e234ce039fdbd57506620ff9346bfa3be7",
-      "size": 7576329
+      "url": "https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.2/io.github.smallrob.sonar-quality-0.1.2-windows-x64.dbxp",
+      "sha256": "874a35b0af5c765f6281dca42ec37467a0f08075648eb969b68da1e6572d720f",
+      "size": 7576976
     }
   ]
 }
