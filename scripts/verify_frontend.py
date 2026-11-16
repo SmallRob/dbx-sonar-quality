@@ -30,7 +30,7 @@ def main():
     parser = ScriptExtractor(); parser.feed(html)
     script = "\n".join(parser.parts)
     if not script.strip(): raise SystemExit("no inline JavaScript extracted")
-    with tempfile.TemporaryDirectory(prefix="sonar-quality-ui-", dir=ROOT.parent / "_tmp") as tmp:
+    with tempfile.TemporaryDirectory(prefix="sonar-quality-ui-") as tmp:
         js = Path(tmp) / "index.js"; js.write_text(script, encoding="utf-8")
         result = subprocess.run(["node", "--check", str(js)], text=True, encoding="utf-8", capture_output=True)
         if result.returncode != 0:
