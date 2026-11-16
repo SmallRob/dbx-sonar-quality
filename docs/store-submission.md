@@ -11,6 +11,33 @@
 4. DBX Store 评审并用官方密钥签名，签名产物回写到同一个 PR；
 5. CI 变绿后由维护者合并。
 
+## 可复用执行顺序（已按 #530 验证）
+
+后续版本按同一顺序执行，不要凭本地打包结果手写候选：
+
+1. 在插件仓库确认 `manifest.json` 版本、`.dbx-store.json` 的 `source`/`permissions` 一致，提交并推送；
+2. 创建并推送 `v<version>` tag，在 GitHub 发布 Release；
+3. 等 Release 工作流的 5 个平台全部成功，确认 Release 附件含 5 个 `.dbxp` 和 `release-candidates.json`；
+4. 在 `t8y2/dbx-store` 的 clone 中运行 `scripts/sync-release-candidate.mjs`，用 Release 的 `release-candidates.json` 生成候选；
+5. Fork 后新建分支，只提交 `candidates/<plugin-id>.json`；不要改动 `plugins/`、`catalog/`，不要重复添加已存在的 publisher；
+6. 开 PR 后确认改动只有 1 个文件，并用 `gh pr checks` 或 GitHub Actions 页面观察校验；
+7. 校验保持红色且唯一错误为 `open candidate(s) awaiting DBX Store signing` 是预期状态，等待维护者评审和签名。
+
+已安装 `gh` 时可直接使用（本机路径 `C:\asdm-tools\_tools\gh\bin\gh.exe`；`GH_TOKEN` 从本机 Git 凭据注入，不要写入仓库）：
+
+```powershell
+$cred = ("protocol=https`nhost=github.com`n`n" | git credential fill)
+$env:GH_TOKEN = (($cred | Select-String -Pattern '^password=') -replace '^password=','')
+$env:PATH = "C:\asdm-tools\_tools\gh\bin;" + $env:PATH
+gh release view v0.1.9 --repo SmallRob/dbx-sonar-quality
+gh pr view 530 --repo t8y2/dbx-store
+gh pr checks 530 --repo t8y2/dbx-store
+```
+
+没有 `gh` 时，用 GitHub REST API 或已经验证过的 `C:\asdm-tools\_tmp\pr_sonar.py` 执行同样的 `check` / `create` 动作。
+
+**不要在本插件仓库保留 `store/candidates/<plugin-id>.json`**：本地打包的压缩参数、构建环境与官方 Release CI 不同，字节哈希必然可能不同；本地副本会误导评审。候选只从 Release 生成，`scripts/build-candidates.py` 只负责本地自测和生成 `dist/release-candidates.json`，不写候选文件。
+
 ## 1. 前置条件
 
 - 仓库公开可读，评审者能核对「源码 ↔ 二进制」的对应关系；

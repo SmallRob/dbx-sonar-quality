@@ -104,29 +104,17 @@ def main() -> int:
                           "permissions": sorted(manifest.get("permissions", []))},
                "artifacts": sorted(artifacts, key=lambda item: item["target"])}
     (DIST / "release-candidates.json").write_text(json.dumps(release, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    store = json.loads((ROOT / ".dbx-store.json").read_text(encoding="utf-8"))
-    icon = store["icon"]
-    if not icon.startswith(("http://", "https://")):
-        icon = f"https://raw.githubusercontent.com/{repository}/v{version}/{icon.lstrip('/')}"
-    candidate = {"schemaVersion": 1, "id": manifest["id"], "publisher": manifest["publisher"], "version": version,
-                 "name": store["name"], "description": store["description"], "icon": icon, "tags": store["tags"],
-                 "permissions": sorted(manifest.get("permissions", [])),
-                 "source": f"https://github.com/{repository}/tree/v{version}", "homepage": f"https://github.com/{repository}",
-                 "license": store["license"], "releaseNotes": store["releaseNotes"],
-                 "localizations": store.get("localizations", {}),
-                 "targets": [{"target": item["target"],
-                              "url": f"https://github.com/{repository}/releases/download/v{version}/{item['url']}",
-                              "sha256": item["sha256"], "size": item["size"]} for item in release["artifacts"]]}
-    candidate_path = ROOT / "store" / "candidates" / f"{manifest['id']}.json"
-    candidate_path.parent.mkdir(parents=True, exist_ok=True)
-    candidate_path.write_text(json.dumps(candidate, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # Do not write store/candidates here. Local packaging bytes differ from the
+    # official release workflow (compression/build environment), so a local
+    # candidate would pin the wrong SHA-256. The review candidate is generated
+    # only from the GitHub Release via dbx-store's sync-release-candidate.mjs.
     for artifact in release["artifacts"]:
         with zipfile.ZipFile(DIST / artifact["url"]) as zf:
             names = zf.namelist()
             if "signature.json" in names: raise SystemExit(f"unsigned candidate contains signature.json: {artifact['url']}")
             if "manifest.json" not in names or not any(name.startswith(f"bin/{artifact['target']}/") for name in names):
                 raise SystemExit(f"package layout invalid: {artifact['url']}")
-    print(f"wrote {DIST / 'release-candidates.json'} and {candidate_path}")
+    print(f"wrote {DIST / 'release-candidates.json'}")
     return 0
 
 if __name__ == "__main__":

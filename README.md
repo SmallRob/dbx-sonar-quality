@@ -28,7 +28,7 @@ backend/                 Go sidecar（JSON-RPC、只读 PG、源码解码、快�
 backend/dbxpluginsdk/    官方 Go SDK 的本地固定副本
 ui/index.html            单文件中文 Workbench，无外部前端依赖
 scripts/                 五平台打包、Docker 平铺包、签名、前端与联调检查
-store/                   市场候选与发布者信息
+store/                   发布者身份；市场候选由 Release 生成，不在仓库保留副本
 docs/                    部署与实现说明
 manifest.json            插件清单
 ```
