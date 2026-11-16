@@ -1,6 +1,6 @@
 # 部署到 193 Docker DBX
 
-本文记录 2026-11-13 在 `10.137.154.193` 的 Docker DBX 上安装、签名、配置与真实验收的结果。文中不包含数据库密码、DBX 登录密码或签名私钥。
+本文记录 2026-11-13 在 `10.137.154.193` 的 Docker DBX 上安装、签名、配置与真实验收的结果，并于 2026-11-16 升级到 `0.1.9`。文中不包含数据库密码、DBX 登录密码或签名私钥。
 
 ## 目标环境
 
@@ -16,14 +16,14 @@
 
 ## 已安装版本
 
-- 版本：`0.1.7`
-- 安装包：`io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp`
-- SHA-256：`15bd31931854c2f790bdedc6dd894f6feda75dcd5965c474ecf141a934dfd227`
-- 大小：`7,526,636` 字节
-- 激活记录：`activations/00000000000000000008-0e3b1fdf-29ef-4754-86f3-96421f119371.json`
+- 版本：`0.1.9`
+- 安装包：`io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp`
+- SHA-256：`edd6a66bba8634cf2fc72c3627f9c08d166b2b1c9ffeb12af17856e2fd998ca4`
+- 大小：`7,529,289` 字节
+- 激活记录：`activations/00000000000000000010-d23448b1-3221-4782-93f0-f5bae2e62555.json`
 - provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
 
-`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注；`0.1.6` 修复问题详情浮窗按钮布局，并在打开时锁定列表滚动；`0.1.7` 把目录筛选改为可搜索、分页、跨页多选的浮窗，并让问题查询与 Markdown 导出共用多目录条件，是当前应使用的版本。不要回滚到旧版本。
+`0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注；`0.1.6` 修复问题详情浮窗按钮布局，并在打开时锁定列表滚动；`0.1.7` 把目录筛选改为可搜索、分页、跨页多选的浮窗，并让问题查询与 Markdown 导出共用多目录条件；`0.1.8` 把顶部扫描记录与对比栏两个扫描选择改为可搜索、分页、单选的浮窗，并让对比默认选中两次留存快照的扫描、禁用相同或无快照的扫描；`0.1.9` 在 0.1.8 基础上把长 Sonar 版本号折叠为 build number、保留完整版本搜索，并修复 390px 移动端顶部与筛选区溢出，是当前应使用的版本。不要回滚到旧版本。
 
 ## Workbench 运行环境约束
 
@@ -83,8 +83,8 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/build-server-package.py `
-     dist/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
-     .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
+     dist/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
+     .build/server/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
      --target linux-x64
    ```
 
@@ -92,9 +92,9 @@ bin/dbx-plugin-sonar-quality
 
    ```powershell
    py -3.12 scripts/sign-package.py `
-     .build/server/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
-     .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.dbxp `
-     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.7-linux-x64.artifact.json `
+     .build/server/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
+     .build/signed/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
+     --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.9-linux-x64.artifact.json `
      --target linux-x64
    ```
 
@@ -145,7 +145,8 @@ DBX_JAVA_BIN=/usr/bin/java
 | `quality/config/test` | `ok=true`、`readOnly=true`、schema 兼容 |
 | `quality/projects` | 2 个项目 |
 | 评审项目 | `ASDM-Code-Analytics-Review`，5 次扫描，3491 条未解决问题 |
-| `quality/scans` | 5 条扫描记录，最新 `AaHIuhZpeh8Lf7H4vhIz` |
+| `quality/scans` | 5 条扫描记录，最新 `AaHIuhZpeh8Lf7H4vhIz`；最新 `hasSnapshot=true`，其余 4 次为 `false` |
+| `quality/compare` | 两次未同时留存快照时返回 400「该历史扫描未留存问题快照」；`0.1.9` UI 会在选择阶段禁用这些扫描，不再让用户点到错误 |
 | `quality/overview` | 问题 3491；Code Smell 3246、Bug 94、漏洞 4、安全热点 147 |
 | `quality/issues` | 总数 3491，分页与排序正常 |
 | `quality/export` | 全部严重度 3491 条、2.48 MB、约 0.2 秒；仅严重 1809 条；按严重度分组与明细字段正确 |
@@ -156,7 +157,7 @@ DBX_JAVA_BIN=/usr/bin/java
 
 ## Workbench UI 验收
 
-`0.1.7` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
+`0.1.9` 部署后，在真实 Chrome 中把 UI 放进 `sandbox="allow-scripts"` 的 iframe 运行，分别验证亮色和暗色：
 
 | 检查 | 结果 |
 | --- | --- |
@@ -169,8 +170,12 @@ DBX_JAVA_BIN=/usr/bin/java
 | 目录搜索 | 输入 `agentorbit` 命中 22 个目录，路径按两行展示并保留完整内容 |
 | 目录跨页多选 | 第 1 页选中 1 个、翻到第 2 页再选 1 个，按钮显示「已选 2 个目录」，`window.__lastQuery.directories` 含 2 条完整路径 |
 | 目录清空与关闭 | 「全部目录（清除目录筛选）」「清空已选」可清空；「应用筛选」、外部点击与 `Escape` 均可关闭浮窗 |
-
-截图：`docs/screenshots/directory-picker-dark.png`、`docs/screenshots/directory-picker-light.png`。
+| 顶部扫描浮窗 | 真实项目 5 次扫描 + 「最新扫描」共 6 行、1/1 页、宽 470px；每行完整时间为主行，版本与 revision 为次行；搜索 `3561` 命中 1 项；单选 `scan-2` 后按钮显示 `11/11 07:36 · 3561`，查询切换为 `analysisUuid=scan-2` |
+| 对比默认 | 真实项目仅最新扫描留存快照：默认基准留空、对比为最新，按钮禁用并提示「仅 1 次扫描留存问题快照；至少需要两次才能比较」；其余 4 行禁用并标注「未留存问题快照」 |
+| 对比浮窗 | 基准、对比两个控件均为可搜索、20 条/页单选浮窗；不含「最新扫描」伪选项；相同扫描时按钮禁用并显示红色「不能相同」 |
+| 对比结果 | 5 条 mock 均有快照时，默认第二新 → 最新；结果为新增、持续、不再出现、净变化 4 张卡，明细标题带具体扫描时间，`__lastCompare` 参数正确 |
+| 扫描分页 | 30 条 mock 下第 1/2 页显示 20 行，第 2/2 页显示 11 行；搜索命中后自动回到 1/1 页并单选成功 |
+| 移动端 | 390px 视口下顶部两列选择器不溢出（控件 178px、浮窗 366px），页面 `scrollWidth=390` |
 | 导出弹窗 | 默认继承当前严重度筛选；选 `CRITICAL` + `MAJOR` 后请求 `severities` 与 `ruleUuids` 正确，`limit=5000`；文件名含严重度与时间 |
 | 导出保存 | 宿主提供 `window.dbxPlugin.saveFile` 时直接保存 `.md`；无保存接口时打开 Markdown 预览，可复制或尝试浏览器下载 |
 | 导出样例 | `docs/samples/sonarqube-issues-sample.md`：脱敏示例，展示导出文件头、严重度汇总与逐条明细字段 |
@@ -180,19 +185,23 @@ DBX_JAVA_BIN=/usr/bin/java
 | 暗色主题 | `data-dbx-theme="dark"` 生效，浮窗背景 `rgb(23, 30, 38)`，页面、面板、输入框、表格与通知均切换为暗色 |
 | 亮色主题 | 保持原有浅色视觉，浮窗背景 `rgb(255, 255, 255)`，不出现残影或低对比 |
 | 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
-| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`d6b796262e3cb76c22d7471dc534bc4e98c3beb9e267aa9ba5294d3a70a8cc9e` |
+| 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`d766eae95bc80b5821eaeee968a23daa8c0f04107ffd42c40aeb21d97c4f71f9` |
+
+截图：`docs/screenshots/scan-picker-dark.png`、`scan-picker-light.png`、`compare-picker-dark.png`、`compare-result-dark.png`、`compare-snapshot-limited-dark.png`、`scan-picker-mobile-dark.png`；目录截图：`directory-picker-dark.png`、`directory-picker-light.png`。
 
 ## 页面验收
 
 1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
-2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.7`；侧栏版本应显示 `v0.1.7`。
+2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.9`；侧栏版本应显示 `v0.1.9`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
 4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
 5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
-6. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
-7. 点击「目录」，搜索路径、翻页并跨页勾选多个目录，点「应用筛选」，确认列表只显示所选目录及其子目录；再点「导出 Markdown」，确认导出范围同样受目录多选限制。
-8. 点击「导出 Markdown」，选择一个或多个严重度，确认宿主弹出保存对话框并生成 `.md`；打开文件检查严重度汇总、分组和逐条明细。
-9. 点击任一问题，确认中文规则说明和源码上下文可见；浮窗打开后页面列表不再滚动，滚轮只滚动详情内容直到底部，关闭按钮为方形且关闭后列表恢复滚动。
+6. 点击顶部「扫描记录」，确认浮窗可搜索 `3561`、翻页为 20 条/页；点选 `11/11 07:36` 后按钮文本切换，概览展示该次历史度量，问题清单明确提示「历史问题快照不可用」，不会用当前问题冒充历史结果。
+7. 进入「扫描记录」：确认真实环境默认对比按钮禁用并提示「仅 1 次扫描留存问题快照」，历史扫描行显示「未留存问题快照」；等后续新扫描产生两次快照后，默认应为第二新 → 最新，比较结果为 4 张卡并列出双向明细。
+8. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
+9. 点击「目录」，搜索路径、翻页并跨页勾选多个目录，点「应用筛选」，确认列表只显示所选目录及其子目录；再点「导出 Markdown」，确认导出范围同样受目录多选限制。
+10. 点击「导出 Markdown」，选择一个或多个严重度，确认宿主弹出保存对话框并生成 `.md`；打开文件检查严重度汇总、分组和逐条明细。
+11. 点击任一问题，确认中文规则说明和源码上下文可见；浮窗打开后页面列表不再滚动，滚轮只滚动详情内容直到底部，关闭按钮为方形且关闭后列表恢复滚动。
 
 ## 故障排查
 
@@ -207,4 +216,5 @@ DBX_JAVA_BIN=/usr/bin/java
 | 导出按钮不可用 | 当前筛选结果为空，或问题接口失败；先确认列表已加载出问题。 |
 | 导出的时间显示异常 | 历史 `0.1.4` 把毫秒时间戳按秒解析；`0.1.5` 已兼容秒/毫秒，重新导出即可。 |
 | 导出无文件/无响应 | 宿主未提供 `window.dbxPlugin.saveFile` 时会显示预览；可在预览中复制，或尝试浏览器下载。 |
-| 历史扫描问题打不开 | 历史扫描的问题快照尚未留存；后台会补齐有扫描记录的最新快照，旧扫描需等待或手动触发。 |
+| 对比按钮不可用 | 基准或对比扫描未通过 `hasSnapshot=true` 校验：`quality/scans` 中未留存问题快照的扫描会被禁用；需要至少两次留存快照的扫描才能比较。插件会自动留存每个项目的最新扫描，后续新扫描可逐步形成可对比窗口。 |
+| 历史扫描问题打不开 | 历史扫描的问题快照尚未留存；概览仍展示历史度量，问题清单会提示「历史问题快照不可用」；后台每 60 秒为有扫描记录的项目补齐最新快照，旧扫描需等待或手动触发。 |

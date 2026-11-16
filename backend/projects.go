@@ -282,6 +282,7 @@ func (p *plugin) scans(ctx context.Context, cfg Config, projectUUID string, limi
 			items[i].Metrics = map[string]float64{}
 		}
 		items[i].QualityGate = gates[items[i].UUID]
+		items[i].HasSnapshot = p.history.hasSnapshot(projectUUID, items[i].UUID)
 	}
 	return items, total, nil
 }

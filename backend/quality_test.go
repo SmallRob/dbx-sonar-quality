@@ -274,8 +274,24 @@ func TestDecodeLZ4JavaBlock(t *testing.T) {
 	}
 }
 
-func TestHistoryCompare(t *testing.T) {
+func TestHistoryHasSnapshot(t *testing.T) {
 	t.Setenv("DBX_PLUGIN_DATA_DIR", t.TempDir())
+	h := &historyStore{}
+	if h.hasSnapshot("p", "a") {
+		t.Fatal("未写入时不应报告存在快照")
+	}
+	if err := h.write(&issueSnapshot{SchemaVersion: 1, ProjectUUID: "p", AnalysisUUID: "a", Issues: []Issue{{Key: "one"}}}); err != nil {
+		t.Fatal(err)
+	}
+	if !h.hasSnapshot("p", "a") {
+		t.Fatal("写入后应报告存在快照")
+	}
+	if h.hasSnapshot("../bad", "a") || h.hasSnapshot("p", "") {
+		t.Fatal("非法标识不应报告存在快照")
+	}
+}
+
+func TestHistoryCompare(t *testing.T) {	t.Setenv("DBX_PLUGIN_DATA_DIR", t.TempDir())
 	h := &historyStore{}
 	from := &issueSnapshot{SchemaVersion: 1, ProjectUUID: "p", AnalysisUUID: "a", Issues: []Issue{{Key: "same"}, {Key: "old"}}}
 	to := &issueSnapshot{SchemaVersion: 1, ProjectUUID: "p", AnalysisUUID: "b", Issues: []Issue{{Key: "same"}, {Key: "new"}}}

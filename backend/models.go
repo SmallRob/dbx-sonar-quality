@@ -30,6 +30,7 @@ type Analysis struct {
 	DurationMS  *int64             `json:"durationMs,omitempty"`
 	QualityGate string             `json:"qualityGate"`
 	Metrics     map[string]float64 `json:"metrics"`
+	HasSnapshot bool               `json:"hasSnapshot"`
 }
 
 type IssueSummary struct {

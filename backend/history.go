@@ -28,6 +28,15 @@ func snapshotPath(projectUUID, analysisUUID string) (string, error) {
 	return filepath.Join(root, "history", projectUUID, analysisUUID+".json.gz"), nil
 }
 
+func (h *historyStore) hasSnapshot(projectUUID, analysisUUID string) bool {
+	path, err := snapshotPath(projectUUID, analysisUUID)
+	if err != nil {
+		return false
+	}
+	info, err := os.Stat(path)
+	return err == nil && info.Size() > 0
+}
+
 func (h *historyStore) read(projectUUID, analysisUUID string) (*issueSnapshot, error) {
 	path, err := snapshotPath(projectUUID, analysisUUID)
 	if err != nil {

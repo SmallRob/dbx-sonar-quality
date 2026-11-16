@@ -12,10 +12,10 @@
   "permissions": [
     "host.workbench"
   ],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.7",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.9",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3. Fixed the issue detail drawer: compact close button, scrollable detail content, locked background list and restored page scroll on close. Directory filter now uses the same searchable, paged, cross-page multi-select popover as rules; issue queries and Markdown exports accept one or many directories.",
+  "releaseNotes": "Added Markdown issue export with per-severity selection. Exports the current project, scan and filter scope into grouped issue details including rule keys, file locations, effort, descriptions and fix guidance, then saves through the DBX host file API. Keeps the searchable multi-rule picker from 0.1.3. Fixed the issue detail drawer: compact close button, scrollable detail content, locked background list and restored page scroll on close. Directory filter now uses the same searchable, paged, cross-page multi-select popover as rules; issue queries and Markdown exports accept one or many directories. Scan selection is now a searchable, paged, single-select popover shared by the top scan switcher and both comparison fields; search matches time, version, revision and UUID, 20 rows per page. Comparison defaults to the second-newest and newest scans that have local snapshots, preserves valid choices on refresh, disables identical or snapshot-less scans with an inline explanation, and reports added, persistent, no-longer-present and net change with scan-named detail groups. Long Sonar version labels collapse to the build number in triggers and tables, while search still matches the full version string.",
   "localizations": {
     "zh-CN": {
       "name": "SonarQube 质量中心",
