@@ -26,7 +26,6 @@
 ```text
 backend/                 Go sidecar（JSON-RPC、只读 PG、源码解码、快照）
 backend/dbxpluginsdk/    官方 Go SDK 的本地固定副本
-backend/vendor/          离线构建依赖
 ui/index.html            单文件中文 Workbench，无外部前端依赖
 scripts/                 五平台打包、Docker 平铺包、签名、前端与联调检查
 store/                   市场候选与发布者信息
@@ -36,7 +35,7 @@ manifest.json            插件清单
 
 ## 构建与测试
 
-需要 Go 1.22+、Python 3.10+、Node.js（仅用于前端语法检查）。
+需要 Go 1.23+、Python 3.10+、Node.js（仅用于前端语法检查与官方打包）。
 
 ```powershell
 $go = "C:\asdm-tools\_tools\go\bin\go.exe"
@@ -44,12 +43,14 @@ $go = "C:\asdm-tools\_tools\go\bin\go.exe"
 py -3.12 scripts/verify_frontend.py
 ```
 
-离线构建五平台未签名市场候选：
+构建五平台未签名市场候选：
 
 ```powershell
 $env:GO_BINARY = "C:\asdm-tools\_tools\go\bin\go.exe"
 py -3.12 scripts/build-candidates.py
 ```
+
+首次构建需要可从 Go module proxy 或本机 module cache 取得 `pgx` 等依赖；官方 SDK 仍随仓库固定在 `backend/dbxpluginsdk/`，不依赖外部 SDK 版本。
 
 产物在 `dist/`：linux-x64、linux-arm64、darwin-x64、darwin-arm64、windows-x64。
 
@@ -86,4 +87,4 @@ py -3.12 scripts/sign-package.py `
 
 - 五平台包不得包含 `signature.json`，市场候选的 `sha256` 与 `size` 必须由构建脚本生成。
 - 不得提交 `.build/`、真实数据库凭据、签名私钥。
-- 正式上架前仍需：README/提审材料、GitHub Actions、Git 提交与 `v0.1.9` tag、Release 资产、DBX Store 候选 PR。
+- 正式上架前检查：README/提审材料、GitHub Actions、Git 提交与 `v0.1.9` tag、Release 资产、DBX Store 候选 PR。上架流程与 PR 填写内容见 [docs/store-submission.md](docs/store-submission.md)。

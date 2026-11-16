@@ -42,7 +42,7 @@ def build(target: str) -> Path:
     CROSS.mkdir(parents=True, exist_ok=True)
     out = CROSS / f"{BINARY}-{goos}-{goarch}{ext}"
     env = dict(os.environ)
-    env.update({"GOOS": goos, "GOARCH": goarch, "CGO_ENABLED": "0", "GOPROXY": "off", "GOFLAGS": "-mod=vendor"})
+    env.update({"GOOS": goos, "GOARCH": goarch, "CGO_ENABLED": "0", "GOFLAGS": "-mod=mod"})
     go = env.get("GO_BINARY", "go")
     print(f"[build] {target}")
     subprocess.run([go, "build", "-trimpath", "-buildvcs=false", "-o", str(out), "."],

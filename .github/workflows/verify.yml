@@ -1,0 +1,102 @@
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache: false
+
+      - name: Vet
+        working-directory: backend
+        run: go vet ./...
+
+      - name: Test
+        working-directory: backend
+        run: go test ./...
+
+      - name: Test the bundled SDK
+        working-directory: backend/dbxpluginsdk
+        run: go test ./...
+
+      - name: Verify the single-file Workbench
+        run: python3 scripts/verify_frontend.py
+
+      - name: Cross-compile every release target
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          mkdir -p ../.crossbuild
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64; do
+            GOOS="${target%/*}" GOARCH="${target#*/}" \
+              go build -o "../.crossbuild/dbx-plugin-sonar-quality-${target%/*}-${target#*/}" .
+            echo "built ${target}"
+          done
+
+      - name: Package and verify the unsigned candidate
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          go build -o ../.crossbuild/dbx-plugin-sonar-quality .
+          cd ..
+          npx --yes @dbx-app/plugin-cli@0.1.10 package .
+          mkdir -p /tmp/dbxpkg
+          cd /tmp/dbxpkg
+          unzip -o "$GITHUB_WORKSPACE"/dist/*.dbxp > /dev/null
+          BIN=$(find /tmp/dbxpkg/bin -type f -print -quit)
+          cd "$GITHUB_WORKSPACE/backend"
+          go run ./cmd/dbxpoke "$BIN"
+
+      - name: Check the manifest against the DBX schema
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/t8y2/dbx/main/plugins/manifest.schema.json -o /tmp/manifest.schema.json
+          python3 - <<'PY'
+          import json, sys
+          schema = json.load(open('/tmp/manifest.schema.json', encoding='utf-8'))
+          manifest = json.load(open('manifest.json', encoding='utf-8'))
+          allowed = set(schema.get('properties', {}))
+          extra = set(manifest) - allowed
+          if extra:
+              print('manifest 含未知字段:', sorted(extra))
+              sys.exit(1)
+          for field in schema.get('required', []):
+              if field not in manifest:
+                  print('manifest 缺必填字段:', field)
+                  sys.exit(1)
+          print('manifest 字段检查通过')
+          PY
+
+      - name: Store metadata must match the manifest identity
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, sys
+          manifest = json.load(open('manifest.json', encoding='utf-8'))
+          store = json.load(open('.dbx-store.json', encoding='utf-8'))
+          if store.get('source') != 'https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.9':
+              print('store source 未指向本版本 tag:', store.get('source'))
+              sys.exit(1)
+          if sorted(store.get('permissions', [])) != sorted(manifest.get('permissions', [])):
+              print('permissions 不一致:')
+              print('  .dbx-store.json:', sorted(store.get('permissions', [])))
+              print('  manifest.json   :', sorted(manifest.get('permissions', [])))
+              sys.exit(1)
+          if store.get('license') != 'Apache-2.0':
+              print('license 必须为 Apache-2.0')
+              sys.exit(1)
+          print('store metadata 检查通过')
+          PY
