@@ -187,8 +187,6 @@ DBX_JAVA_BIN=/usr/bin/java
 | 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
 | 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`d766eae95bc80b5821eaeee968a23daa8c0f04107ffd42c40aeb21d97c4f71f9` |
 
-截图：`docs/screenshots/` 下的 `scan-picker-*`、`compare-picker-*`、`compare-result-*`、`compare-snapshot-limited-*`、`directory-picker-*`、`scan-picker-mobile-*`、`export-modal-*`（亮色/暗色）。
-
 ## 页面验收
 
 1. 打开 `http://<DBX_HOST>:<DBX_PORT>`，用现有 DBX 登录密码登录。
