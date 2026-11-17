@@ -23,18 +23,18 @@
 6. 开 PR 后确认改动只有 1 个文件，并用 `gh pr checks` 或 GitHub Actions 页面观察校验；
 7. 校验保持红色且唯一错误为 `open candidate(s) awaiting DBX Store signing` 是预期状态，等待维护者评审和签名。
 
-已安装 `gh` 时可直接使用（本机路径 `C:\asdm-tools\_tools\gh\bin\gh.exe`；`GH_TOKEN` 从本机 Git 凭据注入，不要写入仓库）：
+已安装 `gh` 时可直接使用（本机路径 `<GH_BINARY_PATH>`；`GH_TOKEN` 从本机 Git 凭据注入，不要写入仓库）：
 
 ```powershell
 $cred = ("protocol=https`nhost=github.com`n`n" | git credential fill)
 $env:GH_TOKEN = (($cred | Select-String -Pattern '^password=') -replace '^password=','')
-$env:PATH = "C:\asdm-tools\_tools\gh\bin;" + $env:PATH
+$env:PATH = "<GH_BINARY_DIR>;" + $env:PATH
 gh release view v0.1.9 --repo SmallRob/dbx-sonar-quality
 gh pr view 530 --repo t8y2/dbx-store
 gh pr checks 530 --repo t8y2/dbx-store
 ```
 
-没有 `gh` 时，用 GitHub REST API 或已经验证过的 `C:\asdm-tools\_tmp\pr_sonar.py` 执行同样的 `check` / `create` 动作。
+没有 `gh` 时，用 GitHub REST API 或本地脚本执行同样的 `check` / `create` 动作。
 
 **不要在本插件仓库保留 `store/candidates/<plugin-id>.json`**：本地打包的压缩参数、构建环境与官方 Release CI 不同，字节哈希必然可能不同；本地副本会误导评审。候选只从 Release 生成，`scripts/build-candidates.py` 只负责本地自测和生成 `dist/release-candidates.json`，不写候选文件。
 
