@@ -1,16 +1,16 @@
-# 部署到 193 Docker DBX
+# 部署到自托管 Docker DBX
 
-本文记录 2026-11-13 在 `10.137.154.193` 的 Docker DBX 上安装、签名、配置与真实验收的结果，并于 2026-11-16 升级到 `0.1.9`。文中不包含数据库密码、DBX 登录密码或签名私钥。
+本文记录在自托管 Docker DBX 上安装、签名、配置与验收的通用流程，并以 `0.1.9` 为例说明。文中不包含数据库密码、DBX 登录密码或签名私钥；真实环境的主机地址、容器名、项目名与宿主路径均以占位符表示。
 
 ## 目标环境
 
 | 项 | 值 |
 | --- | --- |
-| 外部入口 | `http://10.137.154.193:4224` |
+| 外部入口 | `http://<DBX_HOST>:<DBX_PORT>` |
 | 容器 | `dbx` |
 | 镜像 | `dbx:withgit` |
-| 端口 | `4224 -> 4224` |
-| 数据卷 | 宿主 `/data/docker_data/volumes/dbx_dbx-data/_data` → 容器 `/app/data` |
+| 端口 | `<DBX_PORT> -> <DBX_PORT>` |
+| 数据卷 | 宿主 `<DBX_DATA_VOLUME>` → 容器 `/app/data` |
 | 插件目录 | `/app/data/plugins/io.github.smallrob.sonar-quality/{versions,activations}` |
 | 插件数据 | `/app/data/plugin-data/io.github.smallrob.sonar-quality` |
 
@@ -21,7 +21,7 @@
 - SHA-256：`edd6a66bba8634cf2fc72c3627f9c08d166b2b1c9ffeb12af17856e2fd998ca4`
 - 大小：`7,529,289` 字节
 - 激活记录：`activations/00000000000000000010-d23448b1-3221-4782-93f0-f5bae2e62555.json`
-- provenance：`publisher=smallrob`、`signingKeyId=smallrob.internal-2026`、`source=file`
+- provenance：`publisher=smallrob`、`signingKeyId=<SIGNING_KEY_ID>`、`source=file`
 
 `0.1.0` 在 DBX 上初始化失败；`0.1.1` 修复空 `capabilities`；`0.1.2` 移除 `localStorage` 并补齐暗色主题；`0.1.3` 增加规则搜索/分页多选浮窗和多规则查询；`0.1.4` 增加 Markdown 问题明细导出；`0.1.5` 修正毫秒时间戳与实时/快照来源标注；`0.1.6` 修复问题详情浮窗按钮布局，并在打开时锁定列表滚动；`0.1.7` 把目录筛选改为可搜索、分页、跨页多选的浮窗，并让问题查询与 Markdown 导出共用多目录条件；`0.1.8` 把顶部扫描记录与对比栏两个扫描选择改为可搜索、分页、单选的浮窗，并让对比默认选中两次留存快照的扫描、禁用相同或无快照的扫描；`0.1.9` 在 0.1.8 基础上把长 Sonar 版本号折叠为 build number、保留完整版本搜索，并修复 390px 移动端顶部与筛选区溢出，是当前应使用的版本。不要回滚到旧版本。
 
@@ -47,12 +47,12 @@ py -3.12 scripts/verify_frontend.py
 | 项 | 值 |
 | --- | --- |
 | 算法 | Ed25519 |
-| 仓库密钥 | `smallrob.internal-2026` |
-| 公钥 | `PcEBBfxlD4/WnWXCU8UIJ868TDS2gWFi/WFw3LksW1A=` |
+| 仓库密钥 | `<SIGNING_KEY_ID>` |
+| 公钥 | `<SIGNING_PUBLIC_KEY>` |
 | 签名对象 | 包内 `checksums.json` 原始字节 |
 | 签名文件 | 包根目录 `signature.json` |
 
-私钥 seed 位于不入库的 `.build/repo-signing.env`。服务器信任库保留原有 `leansoftx.release-2026`，新增 `smallrob.internal-2026`：
+私钥 seed 位于不入库的 `.build/repo-signing.env`。服务器信任库保留原有官方密钥，新增本仓库内部公钥：
 
 ```text
 GET  /api/plugins/trusted-keys
@@ -113,19 +113,19 @@ bin/dbx-plugin-sonar-quality
 
 ## 安全设置恢复
 
-部署窗口曾临时在 `/data/dbx/.docker-compose.nopull.yml` 加入：
+部署窗口可临时在 compose 中加入：
 
 ```text
 DBX_ALLOW_UNSIGNED_PLUGINS=1
 DBX_WEB_CAPTCHA=off
 ```
 
-安装与验收完成后已移除这两项，恢复原始 compose（2050 字节），备份为 `/data/dbx/.docker-compose.nopull.yml.bak-20261113c`，并用原 `DBX_PASSWORD` 重建 `dbx` 容器。
+安装与验收完成后应移除这两项，恢复原始 compose，并重建 `dbx` 容器。
 
-恢复后非敏感环境变量为：
+恢复后非敏感环境变量示例：
 
 ```text
-DBX_PORT=4224
+DBX_PORT=<DBX_PORT>
 DBX_DISABLE_PASSWORD=false
 DBX_DATA_DIR=/app/data
 DBX_STATIC_DIR=/app/static
@@ -137,15 +137,15 @@ DBX_JAVA_BIN=/usr/bin/java
 
 ## 真实联调结果
 
-使用真实 SonarQube 9.9.8 数据库（容器 `asdm-sonarqube-db`，Web `asdm-sonarqube`）验证：
+使用真实 SonarQube 9.9.8 数据库（容器 `sonarqube-db`，Web `sonarqube`）验证：
 
 | 检查 | 结果 |
 | --- | --- |
 | `quality/config/get` | 返回配置，`hasPassword=true` |
 | `quality/config/test` | `ok=true`、`readOnly=true`、schema 兼容 |
 | `quality/projects` | 2 个项目 |
-| 评审项目 | `ASDM-Code-Analytics-Review`，5 次扫描，3491 条未解决问题 |
-| `quality/scans` | 5 条扫描记录，最新 `AaHIuhZpeh8Lf7H4vhIz`；最新 `hasSnapshot=true`，其余 4 次为 `false` |
+| 评审项目 | `example-review-project`，5 次扫描，3491 条未解决问题 |
+| `quality/scans` | 5 条扫描记录，最新扫描 `hasSnapshot=true`，其余 4 次为 `false` |
 | `quality/compare` | 两次未同时留存快照时返回 400「该历史扫描未留存问题快照」；`0.1.9` UI 会在选择阶段禁用这些扫描，不再让用户点到错误 |
 | `quality/overview` | 问题 3491；Code Smell 3246、Bug 94、漏洞 4、安全热点 147 |
 | `quality/issues` | 总数 3491，分页与排序正常 |
@@ -167,10 +167,10 @@ DBX_JAVA_BIN=/usr/bin/java
 | 规则键 | 每条规则下方显示 `java:S1192`、`go:S1192` 等规则键，可区分同名规则 |
 | 多规则查询 | 「应用筛选」后 `window.__lastQuery.ruleUuids` 含 3 个 UUID；接口查询 `java:S1192` 854 条、`go:S1192` 128 条，合并为 982 条 |
 | 目录浮窗 | 真实 192 个目录、10 页、每页 20 行；浮窗宽 600、高 480，超出屏幕时自动上翻 |
-| 目录搜索 | 输入 `agentorbit` 命中 22 个目录，路径按两行展示并保留完整内容 |
+| 目录搜索 | 输入示例路径命中多个目录，路径按两行展示并保留完整内容 |
 | 目录跨页多选 | 第 1 页选中 1 个、翻到第 2 页再选 1 个，按钮显示「已选 2 个目录」，`window.__lastQuery.directories` 含 2 条完整路径 |
 | 目录清空与关闭 | 「全部目录（清除目录筛选）」「清空已选」可清空；「应用筛选」、外部点击与 `Escape` 均可关闭浮窗 |
-| 顶部扫描浮窗 | 真实项目 5 次扫描 + 「最新扫描」共 6 行、1/1 页、宽 470px；每行完整时间为主行，版本与 revision 为次行；搜索 `3561` 命中 1 项；单选 `scan-2` 后按钮显示 `11/11 07:36 · 3561`，查询切换为 `analysisUuid=scan-2` |
+| 顶部扫描浮窗 | 真实项目 5 次扫描 + 「最新扫描」共 6 行、1/1 页、宽 470px；每行完整时间为主行，版本与 revision 为次行；搜索版本号命中 1 项；单选某扫描后按钮显示对应时间，查询切换为该扫描 |
 | 对比默认 | 真实项目仅最新扫描留存快照：默认基准留空、对比为最新，按钮禁用并提示「仅 1 次扫描留存问题快照；至少需要两次才能比较」；其余 4 行禁用并标注「未留存问题快照」 |
 | 对比浮窗 | 基准、对比两个控件均为可搜索、20 条/页单选浮窗；不含「最新扫描」伪选项；相同扫描时按钮禁用并显示红色「不能相同」 |
 | 对比结果 | 5 条 mock 均有快照时，默认第二新 → 最新；结果为新增、持续、不再出现、净变化 4 张卡，明细标题带具体扫描时间，`__lastCompare` 参数正确 |
@@ -187,16 +187,16 @@ DBX_JAVA_BIN=/usr/bin/java
 | 无表单提交 | 控制台不再出现 `Blocked form submission`；「应用筛选」「保存并连接」均为按钮事件 |
 | 部署 UI 一致性 | 容器内 `ui/index.html` 与本地 SHA-256 一致：`d766eae95bc80b5821eaeee968a23daa8c0f04107ffd42c40aeb21d97c4f71f9` |
 
-截图：`docs/screenshots/scan-picker-dark.png`、`scan-picker-light.png`、`compare-picker-dark.png`、`compare-result-dark.png`、`compare-snapshot-limited-dark.png`、`scan-picker-mobile-dark.png`；目录截图：`directory-picker-dark.png`、`directory-picker-light.png`。
+截图：`docs/screenshots/` 下的 `scan-picker-*`、`compare-picker-*`、`compare-result-*`、`compare-snapshot-limited-*`、`directory-picker-*`、`scan-picker-mobile-*`、`export-modal-*`（亮色/暗色）。
 
 ## 页面验收
 
-1. 打开 `http://10.137.154.193:4224`，用现有 DBX 登录密码登录。
+1. 打开 `http://<DBX_HOST>:<DBX_PORT>`，用现有 DBX 登录密码登录。
 2. 关闭旧的「SonarQube 质量中心」页签并重新打开，确保加载 `0.1.9`；侧栏版本应显示 `v0.1.9`。
 3. 首次打开应显示已配置连接与「只读连接」状态。
 4. 点击右上角「连接设置」，确认弹窗能打开；修改任一字段后点「测试连接」，应有结果提示。
-5. 在项目下拉切换 `ASDM-Code-Analytics-Review`，查看 5 次扫描、问题分布与问题列表。
-6. 点击顶部「扫描记录」，确认浮窗可搜索 `3561`、翻页为 20 条/页；点选 `11/11 07:36` 后按钮文本切换，概览展示该次历史度量，问题清单明确提示「历史问题快照不可用」，不会用当前问题冒充历史结果。
+5. 在项目下拉切换目标项目，查看扫描次数、问题分布与问题列表。
+6. 点击顶部「扫描记录」，确认浮窗可搜索版本号、翻页为 20 条/页；点选某次扫描后按钮文本切换，概览展示该次历史度量，问题清单明确提示「历史问题快照不可用」，不会用当前问题冒充历史结果。
 7. 进入「扫描记录」：确认真实环境默认对比按钮禁用并提示「仅 1 次扫描留存问题快照」，历史扫描行显示「未留存问题快照」；等后续新扫描产生两次快照后，默认应为第二新 → 最新，比较结果为 4 张卡并列出双向明细。
 8. 点击「规则」，搜索并跨页勾选多条规则，点「应用筛选」，确认列表总数与规则计数之和一致。
 9. 点击「目录」，搜索路径、翻页并跨页勾选多个目录，点「应用筛选」，确认列表只显示所选目录及其子目录；再点「导出 Markdown」，确认导出范围同样受目录多选限制。
@@ -211,7 +211,7 @@ DBX_JAVA_BIN=/usr/bin/java
 | 页面能显示但所有按钮无响应 | UI 在 `sandbox=allow-scripts` iframe 中访问了 `localStorage`，脚本初始化中断。`0.1.2` 已移除；`scripts/verify_frontend.py` 会阻止回归。 |
 | 点击「应用筛选」或「保存并连接」无反应 | 原生 `<form>` 提交被 `sandbox` 拦截（无 `allow-forms`）。`0.1.3` 已改为按钮事件；检查是否又引入了 `type="submit"` / `requestSubmit()`。 |
 | `Plugin backend executable does not exist` | 上传了标准 `bin/<target>/` 包。改用 `build-server-package.py` 生成平铺包。 |
-| `signature verification failed` / 拒绝安装 | 服务器未信任 `smallrob.internal-2026`，先写公钥；或包被重新打包导致 `checksums.json` 与签名不一致。 |
+| `signature verification failed` / 拒绝安装 | 服务器未信任本仓库公钥，先写公钥；或包被重新打包导致 `checksums.json` 与签名不一致。 |
 | 配置保存后仍提示未连接 | 检查 `/app/data/plugin-data/io.github.smallrob.sonar-quality/config.json` 权限与密码；`config/test` 会返回具体缺失项。 |
 | 导出按钮不可用 | 当前筛选结果为空，或问题接口失败；先确认列表已加载出问题。 |
 | 导出的时间显示异常 | 历史 `0.1.4` 把毫秒时间戳按秒解析；`0.1.5` 已兼容秒/毫秒，重新导出即可。 |

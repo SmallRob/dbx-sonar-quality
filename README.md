@@ -38,7 +38,7 @@ manifest.json            插件清单
 需要 Go 1.23+、Python 3.10+、Node.js（仅用于前端语法检查与官方打包）。
 
 ```powershell
-$go = "C:\asdm-tools\_tools\go\bin\go.exe"
+$go = "<GO_BINARY_PATH>"
 & $go -C backend test ./...
 py -3.12 scripts/verify_frontend.py
 ```
@@ -46,7 +46,7 @@ py -3.12 scripts/verify_frontend.py
 构建五平台未签名市场候选：
 
 ```powershell
-$env:GO_BINARY = "C:\asdm-tools\_tools\go\bin\go.exe"
+$env:GO_BINARY = "<GO_BINARY_PATH>"
 py -3.12 scripts/build-candidates.py
 ```
 
@@ -73,9 +73,9 @@ py -3.12 scripts/sign-package.py `
 
 签名使用 Ed25519，签名对象是包内 `checksums.json` 的原始字节，结果写入 `signature.json`。私钥只放在不入库的 `.build/repo-signing.env`。
 
-> 市场候选保持未签名，由 DBX Store 在提审通过后用官方密钥签名。自托管部署使用内部仓库密钥（`smallrob.internal-2026`），需要先把对应公钥写入服务器信任库。两者用途不同，不要混用。
+> 市场候选保持未签名，由 DBX Store 在提审通过后用官方密钥签名。自托管部署使用内部仓库密钥，需要先把对应公钥写入服务器信任库。两者用途不同，不要混用。
 
-服务器安装、信任公钥、配置与验收步骤见 [docs/部署-193-Docker-DBX.md](docs/部署-193-Docker-DBX.md)。
+服务器安装、信任公钥、配置与验收步骤见 [docs/部署-Docker-DBX.md](docs/部署-Docker-DBX.md)。
 
 ## 配置
 
