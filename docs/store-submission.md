@@ -29,7 +29,7 @@
 $cred = ("protocol=https`nhost=github.com`n`n" | git credential fill)
 $env:GH_TOKEN = (($cred | Select-String -Pattern '^password=') -replace '^password=','')
 $env:PATH = "<GH_BINARY_DIR>;" + $env:PATH
-gh release view v0.1.9 --repo SmallRob/dbx-sonar-quality
+gh release view v0.1.10 --repo SmallRob/dbx-sonar-quality
 gh pr view 530 --repo t8y2/dbx-store
 gh pr checks 530 --repo t8y2/dbx-store
 ```
@@ -47,9 +47,9 @@ gh pr checks 530 --repo t8y2/dbx-store
 ## 2. 发布 Release
 
 ```bash
-git tag v0.1.9
+git tag v0.1.10
 git push origin main --tags
-# 然后在 GitHub 上创建 Release（tag 用 v0.1.9），触发 .github/workflows/plugin-release.yml
+# 然后在 GitHub 上创建 Release（tag 用 v0.1.10），触发 .github/workflows/plugin-release.yml
 ```
 
 CI（`t8y2/dbx/.github/workflows/plugin-release-reusable.yml@plugin-cli-v0.1.10`）会：
@@ -61,11 +61,11 @@ CI（`t8y2/dbx/.github/workflows/plugin-release-reusable.yml@plugin-cli-v0.1.10`
 发布后 Release 附件应包含：
 
 ```text
-io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp
-io.github.smallrob.sonar-quality-0.1.9-linux-arm64.dbxp
-io.github.smallrob.sonar-quality-0.1.9-windows-x64.dbxp
-io.github.smallrob.sonar-quality-0.1.9-darwin-x64.dbxp
-io.github.smallrob.sonar-quality-0.1.9-darwin-arm64.dbxp
+io.github.smallrob.sonar-quality-0.1.10-linux-x64.dbxp
+io.github.smallrob.sonar-quality-0.1.10-linux-arm64.dbxp
+io.github.smallrob.sonar-quality-0.1.10-windows-x64.dbxp
+io.github.smallrob.sonar-quality-0.1.10-darwin-x64.dbxp
+io.github.smallrob.sonar-quality-0.1.10-darwin-arm64.dbxp
 release-candidates.json
 ```
 
@@ -97,9 +97,9 @@ git clone https://github.com/t8y2/dbx-store.git
 cd dbx-store
 node scripts/sync-release-candidate.mjs \
   --repository SmallRob/dbx-sonar-quality \
-  --tag v0.1.9 \
-  --release-candidates-url https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.9/release-candidates.json \
-  --metadata-url https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.9/.dbx-store.json \
+  --tag v0.1.10 \
+  --release-candidates-url https://github.com/SmallRob/dbx-sonar-quality/releases/download/v0.1.10/release-candidates.json \
+  --metadata-url https://raw.githubusercontent.com/SmallRob/dbx-sonar-quality/v0.1.10/.dbx-store.json \
   --output candidates/io.github.smallrob.sonar-quality.json
 ```
 
@@ -124,9 +124,9 @@ PR 模板需要如实填写这几项：
 | 项 | 本插件的答案 |
 |---|---|
 | Plugin ID | `io.github.smallrob.sonar-quality` |
-| Version | `0.1.9` |
+| Version | `0.1.10` |
 | Publisher ID | `smallrob` |
-| 源码仓库与 tag | `https://github.com/SmallRob/dbx-sonar-quality` @ `v0.1.9` |
+| 源码仓库与 tag | `https://github.com/SmallRob/dbx-sonar-quality` @ `v0.1.10` |
 | 能力与用户流程 | 工作台 + 工具栏/命令面板入口；只读连接 SonarQube PostgreSQL，浏览项目、扫描、问题、对比和全局质量 |
 | 权限 | 仅 `host.workbench`（用于 `openWorkbench` / `closeWorkbench`） |
 | 数据访问 | 只读 PostgreSQL `issues`、`project_branches`、`file_sources` 等 Sonar 数据；读取用户填写的连接配置；本地快照写入插件数据目录 |

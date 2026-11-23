@@ -12,10 +12,10 @@
   "permissions": [
     "host.workbench"
   ],
-  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.9",
+  "source": "https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.10",
   "homepage": "https://github.com/SmallRob/dbx-sonar-quality",
   "license": "Apache-2.0",
-  "releaseNotes": "0.1.9 turns the top scan switcher and both scan comparison fields into searchable, 20-row single-select popovers; adds local issue snapshots with hasSnapshot guards, four-card comparison results, compact build-number labels, and a 390px mobile layout fix. The workspace remains read-only against SonarQube PostgreSQL, with project switching, scan history, rule and directory multi-select filters, Markdown issue export and global quality insights.",
+  "releaseNotes": "0.1.10 fixes Markdown export on DBX: the UI now calls host.saveFile with the required {fileName, contentType} metadata plus a UTF-8 base64 payload, so the save dialog opens instead of failing with host.saveFile requires transferred binary data or dataBase64; a failed or missing host save falls back to the built-in Markdown preview. 0.1.9 had turned the top scan switcher and both scan comparison fields into searchable, 20-row single-select popovers; adds local issue snapshots with hasSnapshot guards, four-card comparison results, compact build-number labels, and a 390px mobile layout fix. The workspace remains read-only against SonarQube PostgreSQL, with project switching, scan history, rule and directory multi-select filters, Markdown issue export and global quality insights.",
   "localizations": {
     "en": {
       "name": "SonarQube Quality Hub",

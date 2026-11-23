@@ -13,7 +13,7 @@ import (
 
 const pluginID = "io.github.smallrob.sonar-quality"
 
-var pluginVersion = "0.1.9"
+var pluginVersion = "0.1.10"
 
 type plugin struct {
 	connector *dbConnector

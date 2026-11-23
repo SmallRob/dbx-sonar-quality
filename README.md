@@ -3,7 +3,7 @@
 把 SonarQube 的老旧英文界面换成面向开发者的中文工作台。插件只读连接 SonarQube 的 PostgreSQL 数据库，直接读取扫描根源数据，不调用 Sonar Web API，也不向 Sonar 写入任何内容。
 
 - 插件 ID：`io.github.smallrob.sonar-quality`
-- 当前版本：`0.1.9`
+- 当前版本：`0.1.10`
 - 发布者：`smallrob`
 - 权限：`host.workbench`
 - 许可证：Apache-2.0
@@ -13,7 +13,7 @@
 - **项目切换**：同时查看多个 Sonar 项目，区分评审项目与普通项目。
 - **扫描历史**：按分析记录查看问题总量、质量门禁、耗时与指标变化；顶部「扫描记录」与对比栏的两个扫描选择都是可搜索、20 条/页、单选的浮窗，支持按时间、版本、revision 搜索；长 Sonar 版本号在按钮与表格中折叠为 build number，搜索仍匹配完整版本。
 - **问题筛选**：按类型、严重级别、规则、目录、文件、关键字筛选，服务端排序分页；规则与目录都支持搜索、分页与跨页多选。
-- **Markdown 导出**：按所选严重度导出当前筛选范围内的问题明细，按等级分组，包含规则键、文件行号、工作量、描述与处理建议；样例见 `docs/samples/sonarqube-issues-sample.md`。
+- **Markdown 导出**：按所选严重度导出当前筛选范围内的问题明细，按等级分组，包含规则键、文件行号、工作量、描述与处理建议；保存走宿主 `fileTransfer` 分块落盘（无 2 MB 桥上限），宿主无保存接口或写盘失败时回落内置预览；样例见 `docs/samples/sonarqube-issues-sample.md`。
 - **中文详情**：问题标题、规则说明、修复建议、变更记录与源码上下文；源码从 `file_sources` 解码，不依赖 Sonar Web。详情浮窗打开时锁定列表滚动，只允许详情内容上下滚动，关闭后恢复。
 - **全局统计**：跨项目质量矩阵、问题类型分布、技术债、覆盖率与安全热点汇总。
 - **扫描对比**：基于本地留存的问题快照，对比两次扫描的新增、持续、不再出现与净变化；默认选择第二新与最新且留存快照的扫描，刷新时保留合法选择，相同或未留存快照的扫描会禁用并给出说明。
@@ -41,7 +41,10 @@ manifest.json            插件清单
 $go = "<GO_BINARY_PATH>"
 & $go -C backend test ./...
 py -3.12 scripts/verify_frontend.py
+py -3.12 scripts/export_contract_test.py
 ```
+
+`verify_frontend.py` 校验单文件 UI 的语法与沙箱约束；`export_contract_test.py` 按 DBX 宿主桥的真实契约跑 Markdown 导出（分块 3 MB 无损、单次保存、用户取消、写盘失败回落预览），防止再次出现 `host.saveFile requires transferred binary data or dataBase64` 与 `Plugin bridge request is too large`。
 
 构建五平台未签名市场候选：
 
@@ -60,14 +63,14 @@ DBX Store 的五平台包使用 `bin/<target>/` 布局；部分 Docker DBX Web �
 
 ```powershell
 py -3.12 scripts/build-server-package.py `
-  dist/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
-  .build/server/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
+  dist/io.github.smallrob.sonar-quality-0.1.10-linux-x64.dbxp `
+  .build/server/io.github.smallrob.sonar-quality-0.1.10-linux-x64.dbxp `
   --target linux-x64
 
 py -3.12 scripts/sign-package.py `
-  .build/server/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
-  .build/signed/io.github.smallrob.sonar-quality-0.1.9-linux-x64.dbxp `
-  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.9-linux-x64.artifact.json `
+  .build/server/io.github.smallrob.sonar-quality-0.1.10-linux-x64.dbxp `
+  .build/signed/io.github.smallrob.sonar-quality-0.1.10-linux-x64.dbxp `
+  --artifact-metadata .build/signed/io.github.smallrob.sonar-quality-0.1.10-linux-x64.artifact.json `
   --target linux-x64
 ```
 
@@ -87,4 +90,4 @@ py -3.12 scripts/sign-package.py `
 
 - 五平台包不得包含 `signature.json`，市场候选的 `sha256` 与 `size` 必须由构建脚本生成。
 - 不得提交 `.build/`、真实数据库凭据、签名私钥。
-- 正式上架前检查：README/提审材料、GitHub Actions、Git 提交与 `v0.1.9` tag、Release 资产、DBX Store 候选 PR。上架流程与 PR 填写内容见 [docs/store-submission.md](docs/store-submission.md)。
+- 正式上架前检查：README/提审材料、GitHub Actions、Git 提交与 `v0.1.10` tag、Release 资产、DBX Store 候选 PR。上架流程与 PR 填写内容见 [docs/store-submission.md](docs/store-submission.md)。

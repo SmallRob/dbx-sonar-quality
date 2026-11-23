@@ -17,3 +17,6 @@ testdata/
 Thumbs.db
 .vscode/
 .idea/
+
+# Local assistant workspace data
+.workbuddy/
