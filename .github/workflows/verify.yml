@@ -87,8 +87,13 @@ jobs:
           import json, sys
           manifest = json.load(open('manifest.json', encoding='utf-8'))
           store = json.load(open('.dbx-store.json', encoding='utf-8'))
-          if store.get('source') != 'https://github.com/SmallRob/dbx-sonar-quality/tree/v0.1.9':
+          # source 必须指向 manifest 版本的 tag；按版本推导，避免每次发版改工作流。
+          expected_source = (
+              'https://github.com/SmallRob/dbx-sonar-quality/tree/v' + str(manifest.get('version', ''))
+          )
+          if store.get('source') != expected_source:
               print('store source 未指向本版本 tag:', store.get('source'))
+              print('  期望:', expected_source)
               sys.exit(1)
           if sorted(store.get('permissions', [])) != sorted(manifest.get('permissions', [])):
               print('permissions 不一致:')
