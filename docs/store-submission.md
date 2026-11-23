@@ -11,7 +11,7 @@
 4. DBX Store 评审并用官方密钥签名，签名产物回写到同一个 PR；
 5. CI 变绿后由维护者合并。
 
-## 可复用执行顺序（已按 #530 验证）
+## 可复用执行顺序（已按 #530、#588 验证）
 
 后续版本按同一顺序执行，不要凭本地打包结果手写候选：
 
@@ -30,8 +30,8 @@ $cred = ("protocol=https`nhost=github.com`n`n" | git credential fill)
 $env:GH_TOKEN = (($cred | Select-String -Pattern '^password=') -replace '^password=','')
 $env:PATH = "<GH_BINARY_DIR>;" + $env:PATH
 gh release view v0.1.10 --repo SmallRob/dbx-sonar-quality
-gh pr view 530 --repo t8y2/dbx-store
-gh pr checks 530 --repo t8y2/dbx-store
+gh pr view 588 --repo t8y2/dbx-store
+gh pr checks 588 --repo t8y2/dbx-store
 ```
 
 没有 `gh` 时，用 GitHub REST API 或本地脚本执行同样的 `check` / `create` 动作。
@@ -164,3 +164,9 @@ JSON-RPC 握手。任何人都能复现同样的构建。
 已上架插件再发新版时，只提交 `candidates/<plugin-id>.json`，且只改 `version`
 与 `targets`；其余字段留空表示沿用目录里的现值。版本号必须严格递增，
 已上架或已撤销的版本不能重提。
+
+`0.1.10` 的提交记录：Release `v0.1.10` → PR
+[#588](https://github.com/t8y2/dbx-store/pull/588)（只含
+`candidates/io.github.smallrob.sonar-quality.json`，校验按预期停在
+`open candidate(s) awaiting DBX Store signing`）。
+
